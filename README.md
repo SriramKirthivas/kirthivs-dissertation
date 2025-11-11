@@ -11,10 +11,12 @@ This is a learning journal repo where I record what I learn each  week. I
 
 ---
 
+## October 2025
+- Learn TLS, SSH, and SMTP protocols fundamentals
+
 ## November 2025
 - Understand Internet-wide scanning and local scanning approaches
 - Study the "Clusters of Re-used Keys" paper in detail
-- Learn TLS, SSH, and SMTP protocols fundamentals
 - Review cryptographic key management basics
 
 ---
