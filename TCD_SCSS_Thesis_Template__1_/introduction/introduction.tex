@@ -1,0 +1,92 @@
+\chapter{Introduction - Chapter}
+
+\section{Section}
+
+\subsection{Subsection}
+
+\subsubsection{SSH}
+
+SSH \cite{rfc4253} : \\
+SSH -> transport layer -> secure, low-level transport protocol. \\
+Provides strong encryption, crypto based host authentication and integrity protection. \\
+Authentication -> host-based authentication. This does not perform user authentication. \\
+Simple and flexible -> to allow parameter negotiation and to minimize number of round trips. 
+Key exchange method, public key algo, symmetric encryption and others are negotiated. \\
+Most env -> 2 round-trips needed for full key exchange, server authentication, service request and accept. 
+Worst case - 3 round trips.
+
+\paragraph{Connection setup :}
+
+Works over any clean 8-bit binary-transparent transport. 
+Transport should protect ssh connections against transmission errors. Client Initiates.
+
+tcp/ip - listens to port 22(ssh). \\
+After connection establishment - client and server must send an identification string.
+
+\subparagraph{Identification string :}
+
+SSH-protoversion-softwareversion SP comments CR LF
+
+Protoversion - 2.0, comments - optional, if comments is used, SP should be used to separate softwareversion and comments. 
+Identification - terminated by a single Carriage Return(CR) and single Line Feed(LF). 
+NULL characters must not be sent. Max length - 255 characters including CR and LF.
+
+Server - may send other lines of data before sending version string. 
+Each line should be terminated by a CR and LF. 
+Such lines should not begin with SSH- and should be encoded in ISO-10646 UTF-8. 
+Client must be able to process such lines. 
+If they are displayed, control character filtering should be used. 
+Primary use is to allow TCP-Wrappers to display error message before disconnecting.
+
+Protoversion and softwareversion - consist of printable US-ASCII characters, with exception of whitespace and minus sign.
+Softwareversion - used to trigger compatibility extensions and to indicate capabilities of implementation. \\
+Example : SSH-2.0-billsSSH\_3.6.3q3\textbackslash CR\textbackslash LF \\
+Key exchange will begin immediately after sending this. 
+All packets will use the binary packet protocol.
+
+\subsubsection{TLS}
+
+TLS \cite{rfc8446} \\
+Transport Layer Security Protocol - primary goal - provide secure channel b/w 2 communicating peers. 
+Only req - reliable, in-order data stream.
+
+Properties of secure channel : \\
+Authentication - server side always authenticated, client side optional. 
+Authentication - via asymmetric crypto like RSA, Elliptic Curve Digital Signature Algo (ECDSA) or 
+Edwards-Curve Digital Signature Algo (EdDSA) or symmetric pre-shared key (PSK). \\
+Confidentiality - Data sent over the channel is only visible to endpoints. 
+TLS does not hide the length of data it transmits, though endpoints may pad TLS records. \\
+Integrity - Data sent cannot be modified by attackers without detection.
+
+TLS has 2 primary components: \\
+Handshake protocol - authenticates communicating parties, negotiates crypto modes and parameters, 
+establishes shared keying material. Resists tampering by attackers. \\
+Record protocol - uses parameters established by handshake to protect traffic. 
+Divides traffic into records independently protected with keys.
+
+TLS - application protocol independent. 
+Does not specify how protocols add security with TLS, how to initiate handshaking or interpret certificates. 
+Left to protocol designers running on top of TLS.
+
+\subsubsection{SMTP}
+
+SMTP \cite{rfc5321} \\
+Objective - transfer mail reliably and efficiently. \\
+SMTP - independent of transmission subsystem and requires only reliable ordered data stream channel. \\
+Important feature - capability to transport mail across multiple networks, referred to as “SMTP mail relaying”.
+
+Network examples: mutually-TCP-accessible hosts on public Internet, TCP/IP Intranet, LAN, WAN.
+
+A process can transfer mail to another using relay or gateway processes. 
+There can be multiple intermediate relay hosts.
+
+SMTP client with a message establishes a two-way channel to an SMTP server. 
+SMTP is responsible for transferring mail to servers or reporting failure.
+
+How messages are presented and domain identifiers are determined is a local matter. 
+Domains may be final or intermediate destinations. 
+SMTP clients that forward all traffic blindly or do not maintain retry queues may conform to the spec 
+but are not fully capable. 
+Fully-capable SMTP implementations support queuing, retrying, and alternate address functions.
+
+\section{Aims}
