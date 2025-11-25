@@ -89,4 +89,76 @@ SMTP clients that forward all traffic blindly or do not maintain retry queues ma
 but are not fully capable. 
 Fully-capable SMTP implementations support queuing, retrying, and alternate address functions.
 
-\section{Aims}
+\section{Cluster of Re-Used Keys} 
+
+The research paper titled \textit{“Cluster of Re-Used Keys”}\cite{cryptoeprint:2018/299}  surveys long-term cryptographic public keys used for TLS and SSH protocols across hosts in ten countries. The hosts examined were primarily those running SMTP, indicating an interest in measuring the security of email and related services. The primary finding is that key re-use is widespread across multiple IP addresses and even across different Autonomous Systems (ASes).
+
+\subsection{Definition of a Cluster}
+A \textbf{cluster} is defined as a set of IP addresses where each host shares at least one public key with another host in the same set.
+
+\subsection{Key Re-Use Observations}
+
+From a scan of 18{,}268 hosts in Ireland, approximately \textbf{53\%} of hosts running a cryptographic service were using public keys that were also observed on another IP address.  
+Out of 54{,}447 host/port combinations running cryptographic protocols in the Irish scan, only \textbf{36\%} (20{,}053 entries) used unique keys—highlighting substantial key re-use.
+
+The scan also identified a total of \textbf{1{,}437 clusters}, with the largest cluster containing \textbf{1{,}991 hosts}.
+
+\subsection{Security Risks of Key Re-Use}
+
+Key re-use introduces several undesirable security and privacy dependencies among cluster members:
+
+\paragraph{Masquerade}
+A breach on any one host allows an attacker to impersonate any other host within the same cluster.
+
+\paragraph{Increased Leak Risk}
+The probability of a private key leak increases significantly; compromise of one host exposes all other hosts sharing the same key.
+
+\paragraph{Credential Capture}
+An attacker masquerading as a legitimate service can capture sensitive credentials such as IMAP or SMTP passwords.
+
+\paragraph{Web Origin Policy Breach}
+If clustered hosts belong to different web origins, a compromise allows attackers to steal HTTP cookies, bypassing the browser's origin policy.
+
+\subsection{Causes of Key Sharing}
+
+Common reasons behind widespread key re-use include:
+
+\begin{itemize}
+    \item A single host being assigned multiple IP addresses
+    \item Redundant mirrored hosts
+    \item Cloned virtual machines containing pre-installed host keys
+    \item Large-scale use of wildcard certificates
+    \item Vendors shipping products with default key pairs
+    \item Operational laziness or misconfiguration by service operators
+\end{itemize}
+
+\section{Cloud Platform Comparison for Internet-Scale Scanning}
+
+\subsection{AWS and Azure Implementations}
+
+\begin{center}
+\begin{tabular}{|p{3cm}|p{6cm}|p{6cm}|}
+\hline
+\textbf{Component} & \textbf{AWS EC2 Implementation} & \textbf{Azure VM Implementation} \\
+\hline
+
+\textbf{Instance Type} &
+Use network-optimized instances such as C-series (Compute Optimized) or M-series (General Purpose) with high network performance. C5n instances are ideal for network-intensive tasks. &
+Use high-throughput instances such as the F-series (Compute Optimized) or Mv2-series (Memory Optimized), which provide high networking speeds. \\
+
+\hline
+
+\textbf{Operating System} &
+A minimal Linux distribution (e.g., Ubuntu Server, Amazon Linux) is preferred. Scanning tools run optimally on Linux. &
+Same: a minimal Linux distribution is recommended for compatibility and performance. \\
+
+\hline
+
+\textbf{Tool Installation} &
+Install high-speed scanning tools like ZMap (for rapid port discovery) and ZGrab or \texttt{tls-scan} for application-layer handshakes and public key collection. &
+Same toolchain: ZMap for SYN-ACK scanning, followed by ZGrab or \texttt{tls-scan} to perform TLS/SSH handshakes and extract certificates or host keys. \\
+
+\hline
+\end{tabular}
+\end{center}
+
