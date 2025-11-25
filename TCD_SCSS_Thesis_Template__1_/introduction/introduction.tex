@@ -161,4 +161,56 @@ Same toolchain: ZMap for SYN-ACK scanning, followed by ZGrab or \texttt{tls-scan
 \hline
 \end{tabular}
 \end{center}
+\section{ZMap Network Scanning Tool}
+
+ZMap is a fast, stateless, single-packet network scanner designed for Internet-wide network surveys \cite{zmap2013}. On typical hardware, ZMap is capable of scanning the entire public IPv4 address space on a single port in under 45 minutes. For example, it can send a TCP SYN packet to every IPv4 address on port~25 to identify potential SMTP servers.
+
+ZMap supports GNU/Linux, macOS, and BSD, and currently implements probe modules for TCP SYN scans, ICMP probes, and DNS queries.
+
+\subsection{Performance and Limitations}
+
+ZMap transmits packets as quickly as the host network interface allows. Since it intentionally does \textbf{not} implement congestion control, two main risks arise:
+
+\paragraph{Target Network DoS}
+Scanning a small subnet at an excessively high rate may unintentionally cause a denial-of-service (DoS). It is recommended not to run ZMap at speeds of 1~Gbps or higher when scanning small networks; instead, keep rates below 10~Mbps to avoid overwhelming the target.
+
+\paragraph{Source Network Overload}
+ZMap may also overload the source network. Some switches and routers cannot handle high-speed traffic consisting of many small packets.
+
+ZMap scans in-scope IP addresses in a random order to reduce localized impact on target networks. The load experienced by a subnet depends on both the configured sending rate and the size of the target IP range.
+
+Potential consequences of overloading a network include:
+\begin{itemize}
+    \item network administrators blocking the scanning IP address,
+    \item routers silently dropping scan traffic,
+    \item disruption of local users due to bandwidth starvation.
+\end{itemize}
+
+\subsection{Execution Model}
+
+By default, ZMap uses four threads, unless the host machine has fewer than four CPU cores. The recommended number of threads for ZMap is:
+\[
+T_{\text{required}} = T + 2,
+\]
+where $T$ is the number of sending threads.
+
+\subsection{Basic Usage}
+
+To perform an initial scan that sends TCP SYN packets to all IP addresses in a subnet \texttt{xx.xx.xx.xx/xx} on port~80 at a send rate of 128~packets/s, use:
+
+\begin{verbatim}
+sudo zmap -p 80 -r 128 xx.xx.xx.xx/xx
+\end{verbatim}
+
+ZMap produces two types of output:
+\begin{enumerate}
+    \item a list of IP addresses that responded, and
+    \item periodic scan status messages printed every second.
+\end{enumerate}
+
+To save scan results to a CSV file, use:
+
+\begin{verbatim}
+sudo zmap -p 80 -o output.csv -r 128 xx.xx.xx.xx/xx
+\end{verbatim}
 
