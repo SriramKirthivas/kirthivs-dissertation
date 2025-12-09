@@ -214,3 +214,154 @@ To save scan results to a CSV file, use:
 sudo zmap -p 80 -o output.csv -r 128 xx.xx.xx.xx/xx
 \end{verbatim}
 
+\subsection{ZMap Testing on Azure VM}
+
+To verify ZMap functionality, test scans were performed against an Azure VM with public IP \texttt{20.0.0.174}.
+
+\subsubsection{Azure Network Security Group Configuration}
+
+Before scanning, inbound rules must be configured in the Azure Network Security Group (NSG) to allow traffic on the target ports. The following steps were performed in the Azure Portal:
+
+\begin{enumerate}
+    \item Navigate to the VM in the Azure Portal
+    \item Click \textbf{Networking} in the left sidebar
+    \item Click \textbf{Add inbound port rule}
+    \item Configure the rule:
+    \begin{itemize}
+        \item Destination port ranges: \texttt{80} (or \texttt{443})
+        \item Protocol: \texttt{TCP}
+        \item Action: \texttt{Allow}
+        \item Priority: \texttt{300} (for port 80), \texttt{310} (for port 443)
+        \item Name: \texttt{Allow\_80}, \texttt{Allow\_443}
+    \end{itemize}
+    \item Click \textbf{Add}
+\end{enumerate}
+
+\subsubsection{Port 80 (HTTP) Scan}
+
+A simple Python HTTP server was started on port 80:
+
+\begin{verbatim}
+sudo python3 -m http.server 80 &
+\end{verbatim}
+
+The following ZMap command was executed:
+
+\begin{verbatim}
+sudo zmap -p 80 -n 1 -r 10 20.0.0.174 -o output.csv
+\end{verbatim}
+
+\paragraph{Output:}
+\begin{verbatim}
+Dec 08 21:03:22.109 [INFO] zmap: output module: csv
+ 0:02 24%; send: 1 done (4 p/s avg); recv: 1 0 p/s (0 p/s avg); 
+    drops: 0 p/s (0 p/s avg); hitrate: 100.00%
+Dec 08 21:03:31.123 [INFO] zmap: completed
+\end{verbatim}
+
+The scan completed successfully with a 100\% hit rate, confirming that the host was reachable on port 80.
+
+\subsubsection{Port 443 (HTTPS) Scan}
+
+Similarly, a Python HTTP server was started on port 443:
+
+\begin{verbatim}
+sudo python3 -m http.server 443 &
+\end{verbatim}
+
+The ZMap scan was then executed:
+
+\begin{verbatim}
+sudo zmap -p 443 -n 1 -r 10 20.0.0.174 -o output_443.csv
+\end{verbatim}
+
+\paragraph{Output:}
+\begin{verbatim}
+ 0:01 12%; send: 1 done (4 p/s avg); recv: 0 0 p/s (0 p/s avg); 
+    drops: 0 p/s (0 p/s avg); hitrate: 0.00%
+ 0:02 24%; send: 1 done (4 p/s avg); recv: 1 0 p/s (0 p/s avg); 
+    drops: 0 p/s (0 p/s avg); hitrate: 100.00%
+Dec 09 10:37:33.654 [INFO] zmap: completed
+\end{verbatim}
+
+This scan also completed with a 100\% hit rate after configuring the NSG rule for port 443.
+
+\subsubsection{ZMap Command Parameters}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter} & \textbf{Description} \\
+\hline
+\texttt{-p} & Target port number \\
+\hline
+\texttt{-n} & Number of hosts to scan \\
+\hline
+\texttt{-r} & Send rate (packets per second) \\
+\hline
+\texttt{-o} & Output file for results \\
+\hline
+\end{tabular}
+\end{center}
+\subsection{Extracting Irish IP Ranges from RIPE NCC}
+
+To obtain a list of IP address ranges allocated to Ireland, the RIPE NCC delegation file was used.
+
+\subsubsection{Data Source}
+
+The delegation file was downloaded from RIPE NCC's FTP server:
+
+\begin{verbatim}
+https://ftp.ripe.net/pub/stats/ripencc/
+\end{verbatim}
+
+The file \texttt{delegated-ripencc-extended-latest} contains IP address allocations for all countries in the RIPE NCC region (Europe, Middle East, and parts of Central Asia).
+
+\subsubsection{Filtering Irish Entries}
+
+The delegation file uses the following format:
+
+\begin{verbatim}
+ripencc|IE|ipv4|x.x.x.x|count|date|status
+\end{verbatim}
+
+Entries with country code \texttt{IE} (Ireland) were extracted and saved to \texttt{ireland\_raw.txt}.
+
+\subsubsection{Converting to CIDR Notation}
+
+The delegation file specifies IP ranges using a start address and count of addresses. The following Python script was used to convert these entries to CIDR notation:
+
+\begin{verbatim}
+import math
+
+with open('ireland_raw.txt', 'r') as f:
+    for line in f:
+        parts = line.strip().split('|')
+        if len(parts) >= 5:
+            ip = parts[3]
+            count = int(parts[4])
+            # Convert count to CIDR prefix
+            prefix = 32 - int(math.log2(count))
+            print(f"{ip}/{prefix}")
+\end{verbatim}
+
+The script calculates the CIDR prefix using the formula:
+
+\[
+\text{prefix} = 32 - \log_2(\text{count})
+\]
+
+For example, a count of 256 addresses results in a \texttt{/24} prefix, while 65536 addresses results in a \texttt{/16} prefix.
+
+\subsubsection{Output}
+
+The resulting CIDR ranges were saved to a text file for use with ZMap. Example output:
+
+\begin{verbatim}
+2.18.248.0/21
+2.19.0.0/21
+5.28.0.0/16
+...
+\end{verbatim}
+
+This list can be provided to ZMap using the \texttt{-w} (whitelist) parameter to scan only Irish IP addresses.
