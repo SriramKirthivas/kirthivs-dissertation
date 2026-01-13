@@ -73,7 +73,7 @@ Left to protocol designers running on top of TLS.
 SMTP \cite{rfc5321} \\
 Objective - transfer mail reliably and efficiently. \\
 SMTP - independent of transmission subsystem and requires only reliable ordered data stream channel. \\
-Important feature - capability to transport mail across multiple networks, referred to as “SMTP mail relaying”.
+Important feature - capability to transport mail across multiple networks, referred to as "SMTP mail relaying".
 
 Network examples: mutually-TCP-accessible hosts on public Internet, TCP/IP Intranet, LAN, WAN.
 
@@ -91,7 +91,7 @@ Fully-capable SMTP implementations support queuing, retrying, and alternate addr
 
 \section{Cluster of Re-Used Keys} 
 
-The research paper titled \textit{“Cluster of Re-Used Keys”}\cite{cryptoeprint:2018/299}  surveys long-term cryptographic public keys used for TLS and SSH protocols across hosts in ten countries. The hosts examined were primarily those running SMTP, indicating an interest in measuring the security of email and related services. The primary finding is that key re-use is widespread across multiple IP addresses and even across different Autonomous Systems (ASes).
+The research paper titled \textit{"Cluster of Re-Used Keys"}\cite{cryptoeprint:2018/299} surveys long-term cryptographic public keys used for TLS and SSH protocols across hosts in ten countries. The hosts examined were primarily those running SMTP, indicating an interest in measuring the security of email and related services. The primary finding is that key re-use is widespread across multiple IP addresses and even across different Autonomous Systems (ASes).
 
 \subsection{Definition of a Cluster}
 A \textbf{cluster} is defined as a set of IP addresses where each host shares at least one public key with another host in the same set.
@@ -132,35 +132,6 @@ Common reasons behind widespread key re-use include:
     \item Operational laziness or misconfiguration by service operators
 \end{itemize}
 
-\section{Cloud Platform Comparison for Internet-Scale Scanning}
-
-\subsection{AWS and Azure Implementations}
-
-\begin{center}
-\begin{tabular}{|p{3cm}|p{6cm}|p{6cm}|}
-\hline
-\textbf{Component} & \textbf{AWS EC2 Implementation} & \textbf{Azure VM Implementation} \\
-\hline
-
-\textbf{Instance Type} &
-Use network-optimized instances such as C-series (Compute Optimized) or M-series (General Purpose) with high network performance. C5n instances are ideal for network-intensive tasks. &
-Use high-throughput instances such as the F-series (Compute Optimized) or Mv2-series (Memory Optimized), which provide high networking speeds. \\
-
-\hline
-
-\textbf{Operating System} &
-A minimal Linux distribution (e.g., Ubuntu Server, Amazon Linux) is preferred. Scanning tools run optimally on Linux. &
-Same: a minimal Linux distribution is recommended for compatibility and performance. \\
-
-\hline
-
-\textbf{Tool Installation} &
-Install high-speed scanning tools like ZMap (for rapid port discovery) and ZGrab or \texttt{tls-scan} for application-layer handshakes and public key collection. &
-Same toolchain: ZMap for SYN-ACK scanning, followed by ZGrab or \texttt{tls-scan} to perform TLS/SSH handshakes and extract certificates or host keys. \\
-
-\hline
-\end{tabular}
-\end{center}
 \section{ZMap Network Scanning Tool}
 
 ZMap is a fast, stateless, single-packet network scanner designed for Internet-wide network surveys \cite{zmap2013}. On typical hardware, ZMap is capable of scanning the entire public IPv4 address space on a single port in under 45 minutes. For example, it can send a TCP SYN packet to every IPv4 address on port~25 to identify potential SMTP servers.
@@ -214,79 +185,7 @@ To save scan results to a CSV file, use:
 sudo zmap -p 80 -o output.csv -r 128 xx.xx.xx.xx/xx
 \end{verbatim}
 
-\subsection{ZMap Testing on Azure VM}
-
-To verify ZMap functionality, test scans were performed against an Azure VM with public IP \texttt{20.0.0.174}.
-
-\subsubsection{Azure Network Security Group Configuration}
-
-Before scanning, inbound rules must be configured in the Azure Network Security Group (NSG) to allow traffic on the target ports. The following steps were performed in the Azure Portal:
-
-\begin{enumerate}
-    \item Navigate to the VM in the Azure Portal
-    \item Click \textbf{Networking} in the left sidebar
-    \item Click \textbf{Add inbound port rule}
-    \item Configure the rule:
-    \begin{itemize}
-        \item Destination port ranges: \texttt{80} (or \texttt{443})
-        \item Protocol: \texttt{TCP}
-        \item Action: \texttt{Allow}
-        \item Priority: \texttt{300} (for port 80), \texttt{310} (for port 443)
-        \item Name: \texttt{Allow\_80}, \texttt{Allow\_443}
-    \end{itemize}
-    \item Click \textbf{Add}
-\end{enumerate}
-
-\subsubsection{Port 80 (HTTP) Scan}
-
-A simple Python HTTP server was started on port 80:
-
-\begin{verbatim}
-sudo python3 -m http.server 80 &
-\end{verbatim}
-
-The following ZMap command was executed:
-
-\begin{verbatim}
-sudo zmap -p 80 -n 1 -r 10 20.0.0.174 -o output.csv
-\end{verbatim}
-
-\paragraph{Output:}
-\begin{verbatim}
-Dec 08 21:03:22.109 [INFO] zmap: output module: csv
- 0:02 24%; send: 1 done (4 p/s avg); recv: 1 0 p/s (0 p/s avg); 
-    drops: 0 p/s (0 p/s avg); hitrate: 100.00%
-Dec 08 21:03:31.123 [INFO] zmap: completed
-\end{verbatim}
-
-The scan completed successfully with a 100\% hit rate, confirming that the host was reachable on port 80.
-
-\subsubsection{Port 443 (HTTPS) Scan}
-
-Similarly, a Python HTTP server was started on port 443:
-
-\begin{verbatim}
-sudo python3 -m http.server 443 &
-\end{verbatim}
-
-The ZMap scan was then executed:
-
-\begin{verbatim}
-sudo zmap -p 443 -n 1 -r 10 20.0.0.174 -o output_443.csv
-\end{verbatim}
-
-\paragraph{Output:}
-\begin{verbatim}
- 0:01 12%; send: 1 done (4 p/s avg); recv: 0 0 p/s (0 p/s avg); 
-    drops: 0 p/s (0 p/s avg); hitrate: 0.00%
- 0:02 24%; send: 1 done (4 p/s avg); recv: 1 0 p/s (0 p/s avg); 
-    drops: 0 p/s (0 p/s avg); hitrate: 100.00%
-Dec 09 10:37:33.654 [INFO] zmap: completed
-\end{verbatim}
-
-This scan also completed with a 100\% hit rate after configuring the NSG rule for port 443.
-
-\subsubsection{ZMap Command Parameters}
+\subsection{ZMap Command Parameters}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -301,67 +200,163 @@ This scan also completed with a 100\% hit rate after configuring the NSG rule fo
 \hline
 \texttt{-o} & Output file for results \\
 \hline
+\texttt{-w} & Whitelist file (IP ranges to scan) \\
+\hline
+\texttt{-b} & Blacklist file (IP ranges to exclude) \\
+\hline
 \end{tabular}
 \end{center}
-\subsection{Extracting Irish IP Ranges from RIPE NCC}
 
-To obtain a list of IP address ranges allocated to Ireland, the RIPE NCC delegation file was used.
+\section{VPS Setup with Hostinger}
 
-\subsubsection{Data Source}
+For internet-scale scanning, a VPS with outbound port 25 access is required. Most networks block port 25 to prevent spam. Hostinger VPS has outbound port 25 enabled by default.
 
-The delegation file was downloaded from RIPE NCC's FTP server:
+\subsection{Selecting VPS Plan}
 
-\begin{verbatim}
-https://ftp.ripe.net/pub/stats/ripencc/
-\end{verbatim}
+\begin{enumerate}
+    \item Go to \url{https://www.hostinger.com/vps-hosting}
+    \item Select KVM 2 or higher plan
+    \item Choose Ubuntu 22.04 LTS
+    \item Complete purchase and wait for provisioning
+\end{enumerate}
 
-The file \texttt{delegated-ripencc-extended-latest} contains IP address allocations for all countries in the RIPE NCC region (Europe, Middle East, and parts of Central Asia).
+\subsection{Initial Setup}
 
-\subsubsection{Filtering Irish Entries}
-
-The delegation file uses the following format:
-
-\begin{verbatim}
-ripencc|IE|ipv4|x.x.x.x|count|date|status
-\end{verbatim}
-
-Entries with country code \texttt{IE} (Ireland) were extracted and saved to \texttt{ireland\_raw.txt}.
-
-\subsubsection{Converting to CIDR Notation}
-
-The delegation file specifies IP ranges using a start address and count of addresses. The following Python script was used to convert these entries to CIDR notation:
+Connect to VPS via SSH:
 
 \begin{verbatim}
-import math
-
-with open('ireland_raw.txt', 'r') as f:
-    for line in f:
-        parts = line.strip().split('|')
-        if len(parts) >= 5:
-            ip = parts[3]
-            count = int(parts[4])
-            # Convert count to CIDR prefix
-            prefix = 32 - int(math.log2(count))
-            print(f"{ip}/{prefix}")
+ssh root@<vps_ip_address>
 \end{verbatim}
 
-The script calculates the CIDR prefix using the formula:
-
-\[
-\text{prefix} = 32 - \log_2(\text{count})
-\]
-
-For example, a count of 256 addresses results in a \texttt{/24} prefix, while 65536 addresses results in a \texttt{/16} prefix.
-
-\subsubsection{Output}
-
-The resulting CIDR ranges were saved to a text file for use with ZMap. Example output:
+Update system:
 
 \begin{verbatim}
-2.18.248.0/21
-2.19.0.0/21
-5.28.0.0/16
-...
+apt update && apt upgrade -y
 \end{verbatim}
 
-This list can be provided to ZMap using the \texttt{-w} (whitelist) parameter to scan only Irish IP addresses.
+\subsection{Verify Port 25 Connectivity}
+
+Hostinger has outbound port 25 enabled by default. Test with:
+
+\begin{verbatim}
+nc -vz smtp.gmail.com 25
+\end{verbatim}
+
+Expected output:
+
+\begin{verbatim}
+Connection to smtp.gmail.com 25 port [tcp/smtp] succeeded!
+\end{verbatim}
+
+\subsection{Install ZMap}
+
+\begin{verbatim}
+apt install -y zmap
+\end{verbatim}
+
+Verify installation:
+
+\begin{verbatim}
+zmap --version
+\end{verbatim}
+
+\subsection{Clone Surveys Repository}
+
+\begin{verbatim}
+cd ~
+git clone https://github.com/sftcd/surveys.git
+cd ~/surveys
+\end{verbatim}
+
+Repository contains scripts for scanning and key reuse analysis: IPsFromMM.py, SameKeys.py, FreshGrab.py, etc.
+
+\section{Extracting Irish IP Ranges from MaxMind}
+
+The surveys repository includes scripts for downloading MaxMind databases and extracting country-specific IP ranges.
+
+\subsection{MaxMind Account Setup}
+
+\begin{enumerate}
+    \item Go to \url{https://www.maxmind.com/en/geolite2/signup}
+    \item Create free account
+    \item Go to Account -> Manage License Keys
+    \item Generate and save license key
+\end{enumerate}
+
+\subsection{Update MaxMind Database}
+
+The repository includes \texttt{mm\_update.sh} script to download MaxMind GeoLite2 databases. The databases are stored in the \texttt{mmdb/} directory within the repository.
+
+\begin{verbatim}
+cd ~/surveys
+export MAXMIND_LICENSE_KEY="YOUR_LICENSE_KEY"
+./mm_update.sh
+\end{verbatim}
+
+This downloads:
+\begin{itemize}
+    \item GeoLite2-ASN database
+    \item GeoLite2-City database
+    \item GeoLite2-Country database
+\end{itemize}
+
+\subsection{Extract Ireland IP Ranges Using IPsFromMM.py}
+
+The \texttt{IPsFromMM.py} script extracts IP prefixes for a specified country from the MaxMind database. It takes the two-letter country code as input (e.g., "IE" for Ireland).
+
+\begin{verbatim}
+cd ~/surveys
+python3 IPsFromMM.py -c IE
+\end{verbatim}
+
+The script:
+\begin{enumerate}
+    \item Reads the country code (IE for Ireland)
+    \item Queries the MaxMind database for matching prefixes
+    \item Outputs IPv4 prefixes to \texttt{mm-ips.IE.v4}
+    \item Outputs IPv6 prefixes to \texttt{mm-ips.IE.v6}
+\end{enumerate}
+
+\subsection{Verify Output}
+
+Check the generated IPv4 prefix file:
+
+\begin{verbatim}
+head mm-ips.IE.v4
+\end{verbatim}
+
+Sample output:
+\begin{verbatim}
+2.18.232.0/21
+2.21.173.0/24
+2.58.8.0/22
+5.62.43.224/27
+5.62.61.76/30
+5.83.224.0/20
+5.133.176.0/21
+5.149.224.0/21
+5.152.192.0/19
+5.178.64.0/19
+\end{verbatim}
+
+Count total blocks:
+\begin{verbatim}
+wc -l mm-ips.IE.v4
+\end{verbatim}
+
+\subsection{Summary}
+
+Setup completed:
+\begin{itemize}
+    \item Hostinger VPS with Ubuntu 22.04
+    \item Port 25 enabled by default, verified with \texttt{nc -vz smtp.gmail.com 25}
+    \item ZMap installed
+    \item Surveys repository cloned from \url{https://github.com/sftcd/surveys}
+    \item MaxMind database updated using \texttt{mm\_update.sh}
+    \item Ireland IP list extracted using \texttt{IPsFromMM.py} and stored in \texttt{mm-ips.IE.v4}
+\end{itemize}
+
+Ready to scan Irish IPs:
+\begin{verbatim}
+sudo zmap -p 25 -w mm-ips.IE.v4 -o ireland_p25.csv -r 1000
+\end{verbatim}
