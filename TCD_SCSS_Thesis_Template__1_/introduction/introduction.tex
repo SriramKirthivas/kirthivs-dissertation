@@ -360,3 +360,144 @@ Ready to scan Irish IPs:
 \begin{verbatim}
 sudo zmap -p 25 -w mm-ips.IE.v4 -o ireland_p25.csv -r 1000
 \end{verbatim}
+
+\section{Research Identification Setup}
+
+When conducting internet scanning, it is good practice to provide identification so that network administrators can understand the purpose of the scan and contact the researcher if needed.
+
+\subsection{DuckDNS Domain Setup}
+
+To provide a resolvable domain name for the scanning VPS:
+
+\begin{enumerate}
+    \item Go to \url{https://www.duckdns.org}
+    \item Sign in with a provider (Google, GitHub, etc.)
+    \item Create a subdomain (e.g., \texttt{tcd-sriram})
+    \item Point it to the VPS public IP address
+\end{enumerate}
+
+Result: The VPS is now accessible via \texttt{tcd-sriram.duckdns.org}
+
+\subsection{Research Identification Web Page}
+
+A simple HTML page was created to identify the research purpose. When anyone accesses the VPS public IP or the DuckDNS URL, they see this information page.
+
+The page includes:
+\begin{itemize}
+    \item Institution: Trinity College Dublin
+    \item Researcher name and supervisor
+    \item Research purpose: Internet scanning infrastructure for cryptographic key re-use study
+    \item Contact email for concerns
+\end{itemize}
+
+To serve the page, a simple web server can be started:
+
+\begin{verbatim}
+# Using Python's built-in HTTP server
+sudo python3 -m http.server 80
+\end{verbatim}
+
+\section{ZMap Scanning Tests}
+
+\subsection{Verifying Port 25 Connectivity}
+
+Before scanning Irish IP ranges, verify that outbound port 25 is working by testing against a known mail server:
+
+\begin{verbatim}
+# Get Google's mail server IP
+host gmail-smtp-in.l.google.com
+
+# Test with ZMap
+sudo zmap -p 25 142.250.153.26/32 -o test-gmail.ips
+cat test-gmail.ips
+\end{verbatim}
+
+Expected output shows 100\% hitrate:
+\begin{verbatim}
+0:02 25%; send: 1 done; recv: 1; hitrate: 100.00%
+\end{verbatim}
+
+This confirms ZMap and port 25 are working correctly.
+
+\subsection{Test Scan with Sample Irish IP Ranges}
+
+A test whitelist file was created with a small subset of Irish IP ranges:
+
+\begin{verbatim}
+# test-ips.IE.v4
+1.178.7.0/24
+2.17.172.0/22
+2.18.236.0/22
+2.19.60.0/22
+2.19.176.0/24
+2.22.227.0/24
+2.57.24.0/22
+2.58.60.0/22
+2.58.180.0/22
+2.59.104.0/22
+3.2.34.128/26
+3.2.57.0/24
+3.2.59.0/24
+\end{verbatim}
+
+Total IPs in test file: approximately 8,512 IPs.
+
+\subsection{Running the Test Scan}
+
+\begin{verbatim}
+sudo zmap -B 100K -p 25 --whitelist-file=test-ips.IE.v4 \
+    --blacklist-file=blacklist.conf -o test-zmap.ips
+\end{verbatim}
+
+\subsection{Test Scan Output}
+
+\begin{verbatim}
+0:00 0%; send: 0 (0 p/s avg); recv: 0; hitrate: 0.00%
+0:10 15%; send: 1474 (147 p/s avg); recv: 0; hitrate: 0.00%
+0:20 30%; send: 2948 (147 p/s avg); recv: 0; hitrate: 0.00%
+0:30 46%; send: 4420 (147 p/s avg); recv: 0; hitrate: 0.00%
+0:40 61%; send: 5894 (147 p/s avg); recv: 0; hitrate: 0.00%
+0:50 76%; send: 7365 (147 p/s avg); recv: 0; hitrate: 0.00%
+0:58 88%; send: 8512 done (147 p/s avg); recv: 0; hitrate: 0.00%
+\end{verbatim}
+
+\subsection{Analysis of Test Results}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Total IPs scanned & 8,512 \\
+\hline
+Scan duration & ~1 minute \\
+\hline
+Average rate & 147 packets/sec \\
+\hline
+Responses received & 0 \\
+\hline
+Hitrate & 0.00\% \\
+\hline
+\end{tabular}
+\end{center}
+
+The 0\% hitrate is expected because the test IP ranges are primarily CDN and cloud provider ranges (Akamai, AWS, Azure) which are geolocated to Ireland but do not typically run public SMTP servers:
+
+\begin{itemize}
+    \item 1.x.x.x - APNIC (Asia-Pacific region)
+    \item 2.x.x.x - Akamai CDN
+    \item 3.x.x.x - AWS cloud infrastructure
+\end{itemize}
+
+The test confirms that:
+\begin{enumerate}
+    \item ZMap is functioning correctly (verified with Google mail server test)
+    \item Port 25 outbound is enabled on the VPS
+    \item Rate limiting (-B 100K) is working as expected
+    \item The scanning infrastructure is ready for production use
+\end{enumerate}
+
+For actual SMTP server discovery, the full \texttt{mm-ips.IE.v4} file should be used, which includes traditional Irish ISP ranges (77.x, 86.x, 87.x, 89.x, etc.) where mail servers are more likely to be found.
+
+\bibliographystyle{plain}
+\bibliography{references}
