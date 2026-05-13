@@ -1,94 +1,45 @@
-\chapter{Figures, Tables, Referencing}
-It is very important to properly refer in the text to any figures, tables or previously published work that you are discussing. Adequate and consistent referencing is one of the criteria which will be used to assess your project report.
+\chapter{Background}
 
-\section{Figures}
-Graphs, pictures and other images should be included in your report as a numbered, captioned figure. An example is given in Figure \ref{veldis}.
+This chapter includes the technical background that is necessary for understanding the remainder of this dissertation. It begins with an explanation of how email functions at the protocol level. Following that, it addresses how TLS and SSH provide protection for those connections. Lastly, it examines the various tools and techniques that are utilized for this scanning process.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h]
-      \centering
-      \includegraphics{background/5e1-1.pdf}
-      \caption{Velocity distribution on the mid-plane for an inlet velocity for case 1.}
-      \label{veldis}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Email Protocols and Architecture}
 
-The figure and caption should be centred. The figure numbering starts at 1 at the beginning of each chapter. The caption should provide a brief description of what is being shown. The figure should appear in the document after it is referred to in the text. No figure should be included which is not referred to in the text. Ensure that the size and resolution of images imported from software are sufficient to read any text.
+Email functions based on several protocols that have existed for many years. The primary protocol is SMTP which stands for Simple Mail Transfer Protocol. This protocol has the job of sending mail between servers. When a person sends an email, their mail client connects with a local mail server through SMTP. After that, the local mail server forwards the email to the mail server of the recipient using SMTP again. The recipient retrieves the email using either POP3 or IMAP, depending on the email setup they have.
 
-\section{Tables}
-Tables are an important way of displaying your results. Table \ref{tab:treatments} is a sample table, adapted from the Master/Doctoral Thesis template at \url{http://www.latextemplates.com/cat/theses}, which was generated with this code:
+SMTP usually uses port 25 for communication between servers. Port 587 is set aside for mail submission, which occurs when a user's mail client sends an email to their local mail server. This difference is important because port 25 is the port that can be accessed on the internet and it is the port that is being looked at in this research.
 
-{\footnotesize
-\begin{verbatim}
-\begin{table}[b]
-\caption{The effects of treatments X and Y on the four groups studied.}
-\label{tab:treatments}
-\centering
-\begin{tabular}{l l l}
-\toprule
-\textbf{Groups} & \textbf{Treatment X} & \textbf{Treatment Y} \\\midrule
-1 & 0.2 & 0.8\\
-2 & 0.17 & 0.7\\
-3 & 0.24 & 0.75\\
-4 & 0.68 & 0.3\\
-\bottomrule\\
-\end{tabular}
-\end{table}
-\end{verbatim}
-}
+POP3 which stands for Post Office Protocol version 3 operates on port 110 for unencrypted communication and port 995 for the TLS encrypted variant. POP3 downloads emails onto the client and usually removes them from the server. IMAP which stands for Internet Message Access Protocol operates on port 143 for unencrypted communication and port 993 for TLS. IMAP retains emails on the server and permits the client to synchronize across various devices. Most contemporary email systems utilize IMAP.
 
-\begin{table}[b]
-\caption{The effects of treatments X and Y on the four groups studied.}
-\label{tab:treatments}
-\centering
-\begin{tabular}{l l l}
-\toprule
-\textbf{Groups} & \textbf{Treatment X} & \textbf{Treatment Y} \\
-\midrule
-1 & 0.2 & 0.8\\
-2 & 0.17 & 0.7\\
-3 & 0.24 & 0.75\\
-4 & 0.68 & 0.3\\
-\bottomrule\\
-\end{tabular}
-\end{table}
+It is essential to mention that all of these protocols can be secured using TLS to safeguard the connection. When TLS is employed, the server presents a certificate that contains a public key. This public key is what we gather and examine for reuse among different servers.
 
-Tables are numbered in the same way as figures. Typically tables also have a short caption, but this is not universally true. The number and caption appear above the table, not below as with figures. Again, no table should appear in the report which has not been referred to in the text. Tables should come after they are discussed in the text. The exact formatting of the table depends somewhat on the content of the table, but in general, the text in the table should be the same font and size as the main text. 
+\section{TLS and Certificate Infrastructure}
+TLS is short for Transport Layer Security and it is the protocol that is utilized for encrypting connections that occur between clients and servers. It has taken the place of the older SSL protocol and it is now the standard used for securing various types of web traffic, email communications, and a range of other internet services.
 
-\section{Equations}
-All equations should be numbered sequentially. Do not restart the numbering at the beginning of each chapter. Unlike figures and tables, you may not need to refer to every equation in the text. You should take care to format equations properly. Do no simply try to use plain text. Use the equation layout facilities. An example of how equations should appear is shown in Equation \ref{sampleequation}. Here is the code for it:
+When a client connects to a server using TLS, the server sends a certificate to the client. This certificate contains the public key of the server and it is signed by a Certificate Authority which is often referred to as CA that the client has trust in. The client then verifies the signature on the certificate and checks to make sure that the certificate has not expired before using the public key to set up an encrypted session. This entire process is known as the TLS handshake.
 
-{\footnotesize
-\begin{verbatim}
-\begin{equation}
-\textrm{div}(\underline{u}) = \frac{\delta u}{\delta x} + \frac{\delta v}{\delta y} +
-        \frac{\delta w}{\delta z} = 0
-\label{sampleequation}
-\end{equation} 
-\end{verbatim}
-}
+Certificates have several important properties that are relevant to this dissertation. They have a validity period that includes a start date and an end date. When the end date arrives, the certificate is viewed as expired and clients are supposed to reject it. But many mail servers keep working with expired certificates because SMTP is usually more lenient compared to HTTPS in this aspect. Certificates can also be self-signed, which means that the server operator has signed it by themselves. Self-signed certificates do provide encryption but do not give authentication, which results in a situation where a client is unable to verify the authenticity of the server.
 
-\begin{equation}
-\textrm{div}(\underline{u}) = \frac{\delta u}{\delta x} + \frac{\delta v}{\delta y} + \frac{\delta w}{\delta z} = 0
-\label{sampleequation}
-\end{equation} 
+The key that is included in the certificate is the most important part for this dissertation. If two servers show certificates that have the same public key, this means that either the same operator is using one key for several servers or there has been a mistake in the key generation process. In both situations, if an attacker manages to obtain the private key, they are able to impersonate the servers or decrypt traffic for all servers that use that key.
 
-\section{Referencing published work}
-It is important to give appropriate credit to other people for the work that they have shared through publications. In fact, you must sign a declaration in your report stating that you understand the nature of plagiarism. As well as avoiding plagiarism, citing results or data from the literature can strengthen your argument, provide a favourable comparison for your results, or even demonstrate how superior your work is.
 
-There are many styles to reference published work. For example, the parenthetical style (which is also called the \emph{Harvard style}) uses the author and date of publication (e.g. ``Smith and Jones, 2001''). There is also the Vancouver style (or the \emph{citation sequence style}), which is used in this document. In the Vancouver style, the publications are cited using bracketed numbers which refer to the list in the References section at the end of the report. The references are listed in the order that they are cited in the report. A variant is \emph{name sequence style}, in which the publications are referenced by number, but the list is arranged alphabetically. The following paragraph shows the use of the Vancouver style: 
+\subsection{Let's Encrypt and ACME}
 
-\begin{quote}
-Several studies have examined the sound field around tandem cylinders generated by flow\cite{fitzpatrick2003flow,finnegan2010experimental}, while other investigations have focused on the effect of an applied sound field on the flow\cite{hall2003vortex}. Papers from conference proceedings\cite{jordan2001array}, books\cite{paidoussis2010fluid} and technical reports\cite{reyes2007power} can be dealt with in the same style.
-\end{quote}
+Let's Encrypt is a free Certificate Authority that started in the year 2015 and has had a large effect on the adoption of TLS. Before Let's Encrypt was available, getting a certificate meant that one had to pay a commercial Certificate Authority which caused many small server operators to opt for self-signed certificates rather than spend money on commercial certificates. 
 
-The Vancouver style has the advantage that it is a little more compact in the text and does not distract from the flow of the sentence if there are a lot of citations. However, it has the disadvantage that it is not immediately clear to the reader what particular work has been referenced.
+Let's Encrypt offers certificates that remain valid for 90 days and uses the ACME protocol to make the process of issuing and renewing certificates fully automated. A server operator can install a tool such as Certbot, execute it once, and thereafter the certificates will renew automatically. The 90-day renewal cycle is significant because it ensures that Let's Encrypt servers obtain fresh certificates and keys more often compared to servers that utilize commercial Certificate Authorities that may issue certificates valid for a year or even longer.
 
-It actually does not matter which particular referencing style is used as long as three important considerations are observed:
-\begin{itemize}
-\item the referencing style used throughout the document is consistent;
-\item all material used or discussed in the text is properly cited;
-\item nothing is included in the reference list that has not been cited.
-\end{itemize}
+In this research, the adoption of Let's Encrypt is significant because it has a direct impact on patterns of key reuse. When a hosting provider utilizes Let's Encrypt with automated renewal, each server receives its own distinct certificate and key, which leads to a decrease in the type of key sharing that is being investigated. The increase in the use of Let's Encrypt is likely one of the primary factors contributing to the reduction in the number of key reuse clusters when compared to previous studies.
 
-This template has a suitable referencing style already set up -- you should use it and use the built-in BibTeX system to manage your references. See above for examples of how to cite a reference and look in the \texttt{sample.bib} file to see BibTeX references. Remember \href{http://scholar.google.com}{Google Scholar} and other search engines will give you BibTeX references for lots of academic publications. Otherwise, you can easily make up your own based on the examples in that file.
+\subsection{Cipher Suites}
+
+During the TLS handshake, a procedure occurs where the client and server negotiate a cipher suite, which consists of various algorithms that are utilized for key exchange, encryption, and message authentication. The cipher suite plays a role in determining the strength of the encryption being utilized.
+
+It is seen as a modern best practice to implement ECDHE for key exchange since this method offers forward secrecy, meaning that if the server's private key were to be compromised, it would not permit the decryption of previous sessions. AES-GCM is the preferred encryption algorithm, and SHA-256 is employed for message authentication.
+
+Nonetheless, there exist older and weaker cipher suites that continue to be in use. RC4 is a stream cipher that was deprecated by RFC 7465 in the year 2015 following the demonstration by researchers that practical attacks against it were possible. Despite this, our scanning revealed that there are servers in Ireland that are still using RC4 connections as late as 2026. CBC mode ciphers are also viewed as weak due to vulnerabilities such as BEAST and Lucky13. The use of static RSA key exchange, which means using the server's RSA key directly for the key exchange process, does not offer forward secrecy and is not recommended anymore.
+
+\section{SSH and Host Keys}
+
+SSH is the Secure Shell protocol that is utilized for remote authentication of servers and it operates on port 22 while using host keys for server identification. When a client makes a connection to an SSH server for the first time, it is given the server's host key and this key is stored by the client. For any future connections, the client will verify that the key has not changed and if there is a change in the key, the client will provide a warning to the user indicating that there may be an issue. 
+
+SSH host keys perform a function that is comparable to TLS certificates since they identify a server through a public key. In situations where two servers have the same SSH host key, if an attacker is able to compromise one of the servers, that attacker can then impersonate the other server. The reuse of SSH host keys can occur when servers are duplicated from a template image without creating new keys or when a hosting provider utilizes the same base image across all of their customers.

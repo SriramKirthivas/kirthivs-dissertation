@@ -1,503 +1,503 @@
 \chapter{Introduction - Chapter}
 
-\section{Section}
+% \section{Section}
 
-\subsection{Subsection}
+% \subsection{Subsection}
 
-\subsubsection{SSH}
+% \subsubsection{SSH}
 
-SSH \cite{rfc4253} : \\
-SSH -> transport layer -> secure, low-level transport protocol. \\
-Provides strong encryption, crypto based host authentication and integrity protection. \\
-Authentication -> host-based authentication. This does not perform user authentication. \\
-Simple and flexible -> to allow parameter negotiation and to minimize number of round trips. 
-Key exchange method, public key algo, symmetric encryption and others are negotiated. \\
-Most env -> 2 round-trips needed for full key exchange, server authentication, service request and accept. 
-Worst case - 3 round trips.
+% SSH \cite{rfc4253} : \\
+% SSH -> transport layer -> secure, low-level transport protocol. \\
+% Provides strong encryption, crypto based host authentication and integrity protection. \\
+% Authentication -> host-based authentication. This does not perform user authentication. \\
+% Simple and flexible -> to allow parameter negotiation and to minimize number of round trips. 
+% Key exchange method, public key algo, symmetric encryption and others are negotiated. \\
+% Most env -> 2 round-trips needed for full key exchange, server authentication, service request and accept. 
+% Worst case - 3 round trips.
 
-\paragraph{Connection setup :}
+% \paragraph{Connection setup :}
 
-Works over any clean 8-bit binary-transparent transport. 
-Transport should protect ssh connections against transmission errors. Client Initiates.
+% Works over any clean 8-bit binary-transparent transport. 
+% Transport should protect ssh connections against transmission errors. Client Initiates.
 
-tcp/ip - listens to port 22(ssh). \\
-After connection establishment - client and server must send an identification string.
+% tcp/ip - listens to port 22(ssh). \\
+% After connection establishment - client and server must send an identification string.
 
-\subparagraph{Identification string :}
+% \subparagraph{Identification string :}
 
-SSH-protoversion-softwareversion SP comments CR LF
+% SSH-protoversion-softwareversion SP comments CR LF
 
-Protoversion - 2.0, comments - optional, if comments is used, SP should be used to separate softwareversion and comments. 
-Identification - terminated by a single Carriage Return(CR) and single Line Feed(LF). 
-NULL characters must not be sent. Max length - 255 characters including CR and LF.
+% Protoversion - 2.0, comments - optional, if comments is used, SP should be used to separate softwareversion and comments. 
+% Identification - terminated by a single Carriage Return(CR) and single Line Feed(LF). 
+% NULL characters must not be sent. Max length - 255 characters including CR and LF.
 
-Server - may send other lines of data before sending version string. 
-Each line should be terminated by a CR and LF. 
-Such lines should not begin with SSH- and should be encoded in ISO-10646 UTF-8. 
-Client must be able to process such lines. 
-If they are displayed, control character filtering should be used. 
-Primary use is to allow TCP-Wrappers to display error message before disconnecting.
+% Server - may send other lines of data before sending version string. 
+% Each line should be terminated by a CR and LF. 
+% Such lines should not begin with SSH- and should be encoded in ISO-10646 UTF-8. 
+% Client must be able to process such lines. 
+% If they are displayed, control character filtering should be used. 
+% Primary use is to allow TCP-Wrappers to display error message before disconnecting.
 
-Protoversion and softwareversion - consist of printable US-ASCII characters, with exception of whitespace and minus sign.
-Softwareversion - used to trigger compatibility extensions and to indicate capabilities of implementation. \\
-Example : SSH-2.0-billsSSH\_3.6.3q3\textbackslash CR\textbackslash LF \\
-Key exchange will begin immediately after sending this. 
-All packets will use the binary packet protocol.
+% Protoversion and softwareversion - consist of printable US-ASCII characters, with exception of whitespace and minus sign.
+% Softwareversion - used to trigger compatibility extensions and to indicate capabilities of implementation. \\
+% Example : SSH-2.0-billsSSH\_3.6.3q3\textbackslash CR\textbackslash LF \\
+% Key exchange will begin immediately after sending this. 
+% All packets will use the binary packet protocol.
 
-\subsubsection{TLS}
+% \subsubsection{TLS}
 
-TLS \cite{rfc8446} \\
-Transport Layer Security Protocol - primary goal - provide secure channel b/w 2 communicating peers. 
-Only req - reliable, in-order data stream.
+% TLS \cite{rfc8446} \\
+% Transport Layer Security Protocol - primary goal - provide secure channel b/w 2 communicating peers. 
+% Only req - reliable, in-order data stream.
 
-Properties of secure channel : \\
-Authentication - server side always authenticated, client side optional. 
-Authentication - via asymmetric crypto like RSA, Elliptic Curve Digital Signature Algo (ECDSA) or 
-Edwards-Curve Digital Signature Algo (EdDSA) or symmetric pre-shared key (PSK). \\
-Confidentiality - Data sent over the channel is only visible to endpoints. 
-TLS does not hide the length of data it transmits, though endpoints may pad TLS records. \\
-Integrity - Data sent cannot be modified by attackers without detection.
+% Properties of secure channel : \\
+% Authentication - server side always authenticated, client side optional. 
+% Authentication - via asymmetric crypto like RSA, Elliptic Curve Digital Signature Algo (ECDSA) or 
+% Edwards-Curve Digital Signature Algo (EdDSA) or symmetric pre-shared key (PSK). \\
+% Confidentiality - Data sent over the channel is only visible to endpoints. 
+% TLS does not hide the length of data it transmits, though endpoints may pad TLS records. \\
+% Integrity - Data sent cannot be modified by attackers without detection.
 
-TLS has 2 primary components: \\
-Handshake protocol - authenticates communicating parties, negotiates crypto modes and parameters, 
-establishes shared keying material. Resists tampering by attackers. \\
-Record protocol - uses parameters established by handshake to protect traffic. 
-Divides traffic into records independently protected with keys.
+% TLS has 2 primary components: \\
+% Handshake protocol - authenticates communicating parties, negotiates crypto modes and parameters, 
+% establishes shared keying material. Resists tampering by attackers. \\
+% Record protocol - uses parameters established by handshake to protect traffic. 
+% Divides traffic into records independently protected with keys.
 
-TLS - application protocol independent. 
-Does not specify how protocols add security with TLS, how to initiate handshaking or interpret certificates. 
-Left to protocol designers running on top of TLS.
+% TLS - application protocol independent. 
+% Does not specify how protocols add security with TLS, how to initiate handshaking or interpret certificates. 
+% Left to protocol designers running on top of TLS.
 
-\subsubsection{SMTP}
+% \subsubsection{SMTP}
 
-SMTP \cite{rfc5321} \\
-Objective - transfer mail reliably and efficiently. \\
-SMTP - independent of transmission subsystem and requires only reliable ordered data stream channel. \\
-Important feature - capability to transport mail across multiple networks, referred to as "SMTP mail relaying".
+% SMTP \cite{rfc5321} \\
+% Objective - transfer mail reliably and efficiently. \\
+% SMTP - independent of transmission subsystem and requires only reliable ordered data stream channel. \\
+% Important feature - capability to transport mail across multiple networks, referred to as "SMTP mail relaying".
 
-Network examples: mutually-TCP-accessible hosts on public Internet, TCP/IP Intranet, LAN, WAN.
+% Network examples: mutually-TCP-accessible hosts on public Internet, TCP/IP Intranet, LAN, WAN.
 
-A process can transfer mail to another using relay or gateway processes. 
-There can be multiple intermediate relay hosts.
+% A process can transfer mail to another using relay or gateway processes. 
+% There can be multiple intermediate relay hosts.
 
-SMTP client with a message establishes a two-way channel to an SMTP server. 
-SMTP is responsible for transferring mail to servers or reporting failure.
+% SMTP client with a message establishes a two-way channel to an SMTP server. 
+% SMTP is responsible for transferring mail to servers or reporting failure.
 
-How messages are presented and domain identifiers are determined is a local matter. 
-Domains may be final or intermediate destinations. 
-SMTP clients that forward all traffic blindly or do not maintain retry queues may conform to the spec 
-but are not fully capable. 
-Fully-capable SMTP implementations support queuing, retrying, and alternate address functions.
+% How messages are presented and domain identifiers are determined is a local matter. 
+% Domains may be final or intermediate destinations. 
+% SMTP clients that forward all traffic blindly or do not maintain retry queues may conform to the spec 
+% but are not fully capable. 
+% Fully-capable SMTP implementations support queuing, retrying, and alternate address functions.
 
-\section{Cluster of Re-Used Keys} 
+% \section{Cluster of Re-Used Keys} 
 
-The research paper titled \textit{"Cluster of Re-Used Keys"}\cite{cryptoeprint:2018/299} surveys long-term cryptographic public keys used for TLS and SSH protocols across hosts in ten countries. The hosts examined were primarily those running SMTP, indicating an interest in measuring the security of email and related services. The primary finding is that key re-use is widespread across multiple IP addresses and even across different Autonomous Systems (ASes).
+% The research paper titled \textit{"Cluster of Re-Used Keys"}\cite{cryptoeprint:2018/299} surveys long-term cryptographic public keys used for TLS and SSH protocols across hosts in ten countries. The hosts examined were primarily those running SMTP, indicating an interest in measuring the security of email and related services. The primary finding is that key re-use is widespread across multiple IP addresses and even across different Autonomous Systems (ASes).
 
-\subsection{Definition of a Cluster}
-A \textbf{cluster} is defined as a set of IP addresses where each host shares at least one public key with another host in the same set.
+% \subsection{Definition of a Cluster}
+% A \textbf{cluster} is defined as a set of IP addresses where each host shares at least one public key with another host in the same set.
 
-\subsection{Key Re-Use Observations}
+% \subsection{Key Re-Use Observations}
 
-From a scan of 18{,}268 hosts in Ireland, approximately \textbf{53\%} of hosts running a cryptographic service were using public keys that were also observed on another IP address.  
-Out of 54{,}447 host/port combinations running cryptographic protocols in the Irish scan, only \textbf{36\%} (20{,}053 entries) used unique keys—highlighting substantial key re-use.
+% From a scan of 18{,}268 hosts in Ireland, approximately \textbf{53\%} of hosts running a cryptographic service were using public keys that were also observed on another IP address.  
+% Out of 54{,}447 host/port combinations running cryptographic protocols in the Irish scan, only \textbf{36\%} (20{,}053 entries) used unique keys—highlighting substantial key re-use.
 
-The scan also identified a total of \textbf{1{,}437 clusters}, with the largest cluster containing \textbf{1{,}991 hosts}.
+% The scan also identified a total of \textbf{1{,}437 clusters}, with the largest cluster containing \textbf{1{,}991 hosts}.
 
-\subsection{Security Risks of Key Re-Use}
+% \subsection{Security Risks of Key Re-Use}
 
-Key re-use introduces several undesirable security and privacy dependencies among cluster members:
+% Key re-use introduces several undesirable security and privacy dependencies among cluster members:
 
-\paragraph{Masquerade}
-A breach on any one host allows an attacker to impersonate any other host within the same cluster.
+% \paragraph{Masquerade}
+% A breach on any one host allows an attacker to impersonate any other host within the same cluster.
 
-\paragraph{Increased Leak Risk}
-The probability of a private key leak increases significantly; compromise of one host exposes all other hosts sharing the same key.
+% \paragraph{Increased Leak Risk}
+% The probability of a private key leak increases significantly; compromise of one host exposes all other hosts sharing the same key.
 
-\paragraph{Credential Capture}
-An attacker masquerading as a legitimate service can capture sensitive credentials such as IMAP or SMTP passwords.
+% \paragraph{Credential Capture}
+% An attacker masquerading as a legitimate service can capture sensitive credentials such as IMAP or SMTP passwords.
 
-\paragraph{Web Origin Policy Breach}
-If clustered hosts belong to different web origins, a compromise allows attackers to steal HTTP cookies, bypassing the browser's origin policy.
+% \paragraph{Web Origin Policy Breach}
+% If clustered hosts belong to different web origins, a compromise allows attackers to steal HTTP cookies, bypassing the browser's origin policy.
 
-\subsection{Causes of Key Sharing}
+% \subsection{Causes of Key Sharing}
 
-Common reasons behind widespread key re-use include:
+% Common reasons behind widespread key re-use include:
 
-\begin{itemize}
-    \item A single host being assigned multiple IP addresses
-    \item Redundant mirrored hosts
-    \item Cloned virtual machines containing pre-installed host keys
-    \item Large-scale use of wildcard certificates
-    \item Vendors shipping products with default key pairs
-    \item Operational laziness or misconfiguration by service operators
-\end{itemize}
+% \begin{itemize}
+%     \item A single host being assigned multiple IP addresses
+%     \item Redundant mirrored hosts
+%     \item Cloned virtual machines containing pre-installed host keys
+%     \item Large-scale use of wildcard certificates
+%     \item Vendors shipping products with default key pairs
+%     \item Operational laziness or misconfiguration by service operators
+% \end{itemize}
 
-\section{ZMap Network Scanning Tool}
+% \section{ZMap Network Scanning Tool}
 
-ZMap is a fast, stateless, single-packet network scanner designed for Internet-wide network surveys \cite{zmap2013}. On typical hardware, ZMap is capable of scanning the entire public IPv4 address space on a single port in under 45 minutes. For example, it can send a TCP SYN packet to every IPv4 address on port~25 to identify potential SMTP servers.
+% ZMap is a fast, stateless, single-packet network scanner designed for Internet-wide network surveys \cite{zmap2013}. On typical hardware, ZMap is capable of scanning the entire public IPv4 address space on a single port in under 45 minutes. For example, it can send a TCP SYN packet to every IPv4 address on port~25 to identify potential SMTP servers.
 
-ZMap supports GNU/Linux, macOS, and BSD, and currently implements probe modules for TCP SYN scans, ICMP probes, and DNS queries.
+% ZMap supports GNU/Linux, macOS, and BSD, and currently implements probe modules for TCP SYN scans, ICMP probes, and DNS queries.
 
-\subsection{Performance and Limitations}
+% \subsection{Performance and Limitations}
 
-ZMap transmits packets as quickly as the host network interface allows. Since it intentionally does \textbf{not} implement congestion control, two main risks arise:
+% ZMap transmits packets as quickly as the host network interface allows. Since it intentionally does \textbf{not} implement congestion control, two main risks arise:
 
-\paragraph{Target Network DoS}
-Scanning a small subnet at an excessively high rate may unintentionally cause a denial-of-service (DoS). It is recommended not to run ZMap at speeds of 1~Gbps or higher when scanning small networks; instead, keep rates below 10~Mbps to avoid overwhelming the target.
+% \paragraph{Target Network DoS}
+% Scanning a small subnet at an excessively high rate may unintentionally cause a denial-of-service (DoS). It is recommended not to run ZMap at speeds of 1~Gbps or higher when scanning small networks; instead, keep rates below 10~Mbps to avoid overwhelming the target.
 
-\paragraph{Source Network Overload}
-ZMap may also overload the source network. Some switches and routers cannot handle high-speed traffic consisting of many small packets.
+% \paragraph{Source Network Overload}
+% ZMap may also overload the source network. Some switches and routers cannot handle high-speed traffic consisting of many small packets.
 
-ZMap scans in-scope IP addresses in a random order to reduce localized impact on target networks. The load experienced by a subnet depends on both the configured sending rate and the size of the target IP range.
+% ZMap scans in-scope IP addresses in a random order to reduce localized impact on target networks. The load experienced by a subnet depends on both the configured sending rate and the size of the target IP range.
 
-Potential consequences of overloading a network include:
-\begin{itemize}
-    \item network administrators blocking the scanning IP address,
-    \item routers silently dropping scan traffic,
-    \item disruption of local users due to bandwidth starvation.
-\end{itemize}
+% Potential consequences of overloading a network include:
+% \begin{itemize}
+%     \item network administrators blocking the scanning IP address,
+%     \item routers silently dropping scan traffic,
+%     \item disruption of local users due to bandwidth starvation.
+% \end{itemize}
 
-\subsection{Execution Model}
+% \subsection{Execution Model}
 
-By default, ZMap uses four threads, unless the host machine has fewer than four CPU cores. The recommended number of threads for ZMap is:
-\[
-T_{\text{required}} = T + 2,
-\]
-where $T$ is the number of sending threads.
+% By default, ZMap uses four threads, unless the host machine has fewer than four CPU cores. The recommended number of threads for ZMap is:
+% \[
+% T_{\text{required}} = T + 2,
+% \]
+% where $T$ is the number of sending threads.
 
-\subsection{Basic Usage}
+% \subsection{Basic Usage}
 
-To perform an initial scan that sends TCP SYN packets to all IP addresses in a subnet \texttt{xx.xx.xx.xx/xx} on port~80 at a send rate of 128~packets/s, use:
+% To perform an initial scan that sends TCP SYN packets to all IP addresses in a subnet \texttt{xx.xx.xx.xx/xx} on port~80 at a send rate of 128~packets/s, use:
 
-\begin{verbatim}
-sudo zmap -p 80 -r 128 xx.xx.xx.xx/xx
-\end{verbatim}
+% \begin{verbatim}
+% sudo zmap -p 80 -r 128 xx.xx.xx.xx/xx
+% \end{verbatim}
 
-ZMap produces two types of output:
-\begin{enumerate}
-    \item a list of IP addresses that responded, and
-    \item periodic scan status messages printed every second.
-\end{enumerate}
+% ZMap produces two types of output:
+% \begin{enumerate}
+%     \item a list of IP addresses that responded, and
+%     \item periodic scan status messages printed every second.
+% \end{enumerate}
 
-To save scan results to a CSV file, use:
+% To save scan results to a CSV file, use:
 
-\begin{verbatim}
-sudo zmap -p 80 -o output.csv -r 128 xx.xx.xx.xx/xx
-\end{verbatim}
+% \begin{verbatim}
+% sudo zmap -p 80 -o output.csv -r 128 xx.xx.xx.xx/xx
+% \end{verbatim}
 
-\subsection{ZMap Command Parameters}
+% \subsection{ZMap Command Parameters}
 
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Parameter} & \textbf{Description} \\
-\hline
-\texttt{-p} & Target port number \\
-\hline
-\texttt{-n} & Number of hosts to scan \\
-\hline
-\texttt{-r} & Send rate (packets per second) \\
-\hline
-\texttt{-o} & Output file for results \\
-\hline
-\texttt{-w} & Whitelist file (IP ranges to scan) \\
-\hline
-\texttt{-b} & Blacklist file (IP ranges to exclude) \\
-\hline
-\end{tabular}
-\end{center}
+% \begin{center}
+% \begin{tabular}{|l|l|}
+% \hline
+% \textbf{Parameter} & \textbf{Description} \\
+% \hline
+% \texttt{-p} & Target port number \\
+% \hline
+% \texttt{-n} & Number of hosts to scan \\
+% \hline
+% \texttt{-r} & Send rate (packets per second) \\
+% \hline
+% \texttt{-o} & Output file for results \\
+% \hline
+% \texttt{-w} & Whitelist file (IP ranges to scan) \\
+% \hline
+% \texttt{-b} & Blacklist file (IP ranges to exclude) \\
+% \hline
+% \end{tabular}
+% \end{center}
 
-\section{VPS Setup with Hostinger}
+% \section{VPS Setup with Hostinger}
 
-For internet-scale scanning, a VPS with outbound port 25 access is required. Most networks block port 25 to prevent spam. Hostinger VPS has outbound port 25 enabled by default.
+% For internet-scale scanning, a VPS with outbound port 25 access is required. Most networks block port 25 to prevent spam. Hostinger VPS has outbound port 25 enabled by default.
 
-\subsection{Selecting VPS Plan}
+% \subsection{Selecting VPS Plan}
 
-\begin{enumerate}
-    \item Go to \url{https://www.hostinger.com/vps-hosting}
-    \item Select KVM 2 or higher plan
-    \item Choose Ubuntu 22.04 LTS
-    \item Complete purchase and wait for provisioning
-\end{enumerate}
+% \begin{enumerate}
+%     \item Go to \url{https://www.hostinger.com/vps-hosting}
+%     \item Select KVM 2 or higher plan
+%     \item Choose Ubuntu 22.04 LTS
+%     \item Complete purchase and wait for provisioning
+% \end{enumerate}
 
-\subsection{Initial Setup}
+% \subsection{Initial Setup}
 
-Connect to VPS via SSH:
+% Connect to VPS via SSH:
 
-\begin{verbatim}
-ssh root@<vps_ip_address>
-\end{verbatim}
+% \begin{verbatim}
+% ssh root@<vps_ip_address>
+% \end{verbatim}
 
-Update system:
+% Update system:
 
-\begin{verbatim}
-apt update && apt upgrade -y
-\end{verbatim}
+% \begin{verbatim}
+% apt update && apt upgrade -y
+% \end{verbatim}
 
-\subsection{Verify Port 25 Connectivity}
+% \subsection{Verify Port 25 Connectivity}
 
-Hostinger has outbound port 25 enabled by default. Test with:
+% Hostinger has outbound port 25 enabled by default. Test with:
 
-\begin{verbatim}
-nc -vz smtp.gmail.com 25
-\end{verbatim}
+% \begin{verbatim}
+% nc -vz smtp.gmail.com 25
+% \end{verbatim}
 
-Expected output:
+% Expected output:
 
-\begin{verbatim}
-Connection to smtp.gmail.com 25 port [tcp/smtp] succeeded!
-\end{verbatim}
+% \begin{verbatim}
+% Connection to smtp.gmail.com 25 port [tcp/smtp] succeeded!
+% \end{verbatim}
 
-\subsection{Install ZMap}
+% \subsection{Install ZMap}
 
-\begin{verbatim}
-apt install -y zmap
-\end{verbatim}
+% \begin{verbatim}
+% apt install -y zmap
+% \end{verbatim}
 
-Verify installation:
+% Verify installation:
 
-\begin{verbatim}
-zmap --version
-\end{verbatim}
+% \begin{verbatim}
+% zmap --version
+% \end{verbatim}
 
-\subsection{Clone Surveys Repository}
+% \subsection{Clone Surveys Repository}
 
-\begin{verbatim}
-cd ~
-git clone https://github.com/sftcd/surveys.git
-cd ~/surveys
-\end{verbatim}
+% \begin{verbatim}
+% cd ~
+% git clone https://github.com/sftcd/surveys.git
+% cd ~/surveys
+% \end{verbatim}
 
-Repository contains scripts for scanning and key reuse analysis: IPsFromMM.py, SameKeys.py, FreshGrab.py, etc.
+% Repository contains scripts for scanning and key reuse analysis: IPsFromMM.py, SameKeys.py, FreshGrab.py, etc.
 
-\section{Extracting Irish IP Ranges from MaxMind}
+% \section{Extracting Irish IP Ranges from MaxMind}
 
-The surveys repository includes scripts for downloading MaxMind databases and extracting country-specific IP ranges.
+% The surveys repository includes scripts for downloading MaxMind databases and extracting country-specific IP ranges.
 
-\subsection{MaxMind Account Setup}
+% \subsection{MaxMind Account Setup}
 
-\begin{enumerate}
-    \item Go to \url{https://www.maxmind.com/en/geolite2/signup}
-    \item Create free account
-    \item Go to Account -> Manage License Keys
-    \item Generate and save license key
-\end{enumerate}
+% \begin{enumerate}
+%     \item Go to \url{https://www.maxmind.com/en/geolite2/signup}
+%     \item Create free account
+%     \item Go to Account -> Manage License Keys
+%     \item Generate and save license key
+% \end{enumerate}
 
-\subsection{Update MaxMind Database}
+% \subsection{Update MaxMind Database}
 
-The repository includes \texttt{mm\_update.sh} script to download MaxMind GeoLite2 databases. The databases are stored in the \texttt{mmdb/} directory within the repository.
+% The repository includes \texttt{mm\_update.sh} script to download MaxMind GeoLite2 databases. The databases are stored in the \texttt{mmdb/} directory within the repository.
 
-\begin{verbatim}
-cd ~/surveys
-export MAXMIND_LICENSE_KEY="YOUR_LICENSE_KEY"
-./mm_update.sh
-\end{verbatim}
+% \begin{verbatim}
+% cd ~/surveys
+% export MAXMIND_LICENSE_KEY="YOUR_LICENSE_KEY"
+% ./mm_update.sh
+% \end{verbatim}
 
-This downloads:
-\begin{itemize}
-    \item GeoLite2-ASN database
-    \item GeoLite2-City database
-    \item GeoLite2-Country database
-\end{itemize}
+% This downloads:
+% \begin{itemize}
+%     \item GeoLite2-ASN database
+%     \item GeoLite2-City database
+%     \item GeoLite2-Country database
+% \end{itemize}
 
-\subsection{Extract Ireland IP Ranges Using IPsFromMM.py}
+% \subsection{Extract Ireland IP Ranges Using IPsFromMM.py}
 
-The \texttt{IPsFromMM.py} script extracts IP prefixes for a specified country from the MaxMind database. It takes the two-letter country code as input (e.g., "IE" for Ireland).
+% The \texttt{IPsFromMM.py} script extracts IP prefixes for a specified country from the MaxMind database. It takes the two-letter country code as input (e.g., "IE" for Ireland).
 
-\begin{verbatim}
-cd ~/surveys
-python3 IPsFromMM.py -c IE
-\end{verbatim}
+% \begin{verbatim}
+% cd ~/surveys
+% python3 IPsFromMM.py -c IE
+% \end{verbatim}
 
-The script:
-\begin{enumerate}
-    \item Reads the country code (IE for Ireland)
-    \item Queries the MaxMind database for matching prefixes
-    \item Outputs IPv4 prefixes to \texttt{mm-ips.IE.v4}
-    \item Outputs IPv6 prefixes to \texttt{mm-ips.IE.v6}
-\end{enumerate}
+% The script:
+% \begin{enumerate}
+%     \item Reads the country code (IE for Ireland)
+%     \item Queries the MaxMind database for matching prefixes
+%     \item Outputs IPv4 prefixes to \texttt{mm-ips.IE.v4}
+%     \item Outputs IPv6 prefixes to \texttt{mm-ips.IE.v6}
+% \end{enumerate}
 
-\subsection{Verify Output}
+% \subsection{Verify Output}
 
-Check the generated IPv4 prefix file:
+% Check the generated IPv4 prefix file:
 
-\begin{verbatim}
-head mm-ips.IE.v4
-\end{verbatim}
+% \begin{verbatim}
+% head mm-ips.IE.v4
+% \end{verbatim}
 
-Sample output:
-\begin{verbatim}
-2.18.232.0/21
-2.21.173.0/24
-2.58.8.0/22
-5.62.43.224/27
-5.62.61.76/30
-5.83.224.0/20
-5.133.176.0/21
-5.149.224.0/21
-5.152.192.0/19
-5.178.64.0/19
-\end{verbatim}
+% Sample output:
+% \begin{verbatim}
+% 2.18.232.0/21
+% 2.21.173.0/24
+% 2.58.8.0/22
+% 5.62.43.224/27
+% 5.62.61.76/30
+% 5.83.224.0/20
+% 5.133.176.0/21
+% 5.149.224.0/21
+% 5.152.192.0/19
+% 5.178.64.0/19
+% \end{verbatim}
 
-Count total blocks:
-\begin{verbatim}
-wc -l mm-ips.IE.v4
-\end{verbatim}
+% Count total blocks:
+% \begin{verbatim}
+% wc -l mm-ips.IE.v4
+% \end{verbatim}
 
-\subsection{Summary}
+% \subsection{Summary}
 
-Setup completed:
-\begin{itemize}
-    \item Hostinger VPS with Ubuntu 22.04
-    \item Port 25 enabled by default, verified with \texttt{nc -vz smtp.gmail.com 25}
-    \item ZMap installed
-    \item Surveys repository cloned from \url{https://github.com/sftcd/surveys}
-    \item MaxMind database updated using \texttt{mm\_update.sh}
-    \item Ireland IP list extracted using \texttt{IPsFromMM.py} and stored in \texttt{mm-ips.IE.v4}
-\end{itemize}
+% Setup completed:
+% \begin{itemize}
+%     \item Hostinger VPS with Ubuntu 22.04
+%     \item Port 25 enabled by default, verified with \texttt{nc -vz smtp.gmail.com 25}
+%     \item ZMap installed
+%     \item Surveys repository cloned from \url{https://github.com/sftcd/surveys}
+%     \item MaxMind database updated using \texttt{mm\_update.sh}
+%     \item Ireland IP list extracted using \texttt{IPsFromMM.py} and stored in \texttt{mm-ips.IE.v4}
+% \end{itemize}
 
-Ready to scan Irish IPs:
-\begin{verbatim}
-sudo zmap -p 25 -w mm-ips.IE.v4 -o ireland_p25.csv -r 1000
-\end{verbatim}
+% Ready to scan Irish IPs:
+% \begin{verbatim}
+% sudo zmap -p 25 -w mm-ips.IE.v4 -o ireland_p25.csv -r 1000
+% \end{verbatim}
 
-\section{Research Identification Setup}
+% \section{Research Identification Setup}
 
-When conducting internet scanning, it is good practice to provide identification so that network administrators can understand the purpose of the scan and contact the researcher if needed.
+% When conducting internet scanning, it is good practice to provide identification so that network administrators can understand the purpose of the scan and contact the researcher if needed.
 
-\subsection{DuckDNS Domain Setup}
+% \subsection{DuckDNS Domain Setup}
 
-To provide a resolvable domain name for the scanning VPS:
+% To provide a resolvable domain name for the scanning VPS:
 
-\begin{enumerate}
-    \item Go to \url{https://www.duckdns.org}
-    \item Sign in with a provider (Google, GitHub, etc.)
-    \item Create a subdomain (e.g., \texttt{tcd-sriram})
-    \item Point it to the VPS public IP address
-\end{enumerate}
+% \begin{enumerate}
+%     \item Go to \url{https://www.duckdns.org}
+%     \item Sign in with a provider (Google, GitHub, etc.)
+%     \item Create a subdomain (e.g., \texttt{tcd-sriram})
+%     \item Point it to the VPS public IP address
+% \end{enumerate}
 
-Result: The VPS is now accessible via \texttt{tcd-sriram.duckdns.org}
+% Result: The VPS is now accessible via \texttt{tcd-sriram.duckdns.org}
 
-\subsection{Research Identification Web Page}
+% \subsection{Research Identification Web Page}
 
-A simple HTML page was created to identify the research purpose. When anyone accesses the VPS public IP or the DuckDNS URL, they see this information page.
+% A simple HTML page was created to identify the research purpose. When anyone accesses the VPS public IP or the DuckDNS URL, they see this information page.
 
-The page includes:
-\begin{itemize}
-    \item Institution: Trinity College Dublin
-    \item Researcher name and supervisor
-    \item Research purpose: Internet scanning infrastructure for cryptographic key re-use study
-    \item Contact email for concerns
-\end{itemize}
+% The page includes:
+% \begin{itemize}
+%     \item Institution: Trinity College Dublin
+%     \item Researcher name and supervisor
+%     \item Research purpose: Internet scanning infrastructure for cryptographic key re-use study
+%     \item Contact email for concerns
+% \end{itemize}
 
-To serve the page, a simple web server can be started:
+% To serve the page, a simple web server can be started:
 
-\begin{verbatim}
-# Using Python's built-in HTTP server
-sudo python3 -m http.server 80
-\end{verbatim}
+% \begin{verbatim}
+% # Using Python's built-in HTTP server
+% sudo python3 -m http.server 80
+% \end{verbatim}
 
-\section{ZMap Scanning Tests}
+% \section{ZMap Scanning Tests}
 
-\subsection{Verifying Port 25 Connectivity}
+% \subsection{Verifying Port 25 Connectivity}
 
-Before scanning Irish IP ranges, verify that outbound port 25 is working by testing against a known mail server:
+% Before scanning Irish IP ranges, verify that outbound port 25 is working by testing against a known mail server:
 
-\begin{verbatim}
-# Get Google's mail server IP
-host gmail-smtp-in.l.google.com
+% \begin{verbatim}
+% # Get Google's mail server IP
+% host gmail-smtp-in.l.google.com
 
-# Test with ZMap
-sudo zmap -p 25 142.250.153.26/32 -o test-gmail.ips
-cat test-gmail.ips
-\end{verbatim}
+% # Test with ZMap
+% sudo zmap -p 25 142.250.153.26/32 -o test-gmail.ips
+% cat test-gmail.ips
+% \end{verbatim}
 
-Expected output shows 100\% hitrate:
-\begin{verbatim}
-0:02 25%; send: 1 done; recv: 1; hitrate: 100.00%
-\end{verbatim}
+% Expected output shows 100\% hitrate:
+% \begin{verbatim}
+% 0:02 25%; send: 1 done; recv: 1; hitrate: 100.00%
+% \end{verbatim}
 
-This confirms ZMap and port 25 are working correctly.
+% This confirms ZMap and port 25 are working correctly.
 
-\subsection{Test Scan with Sample Irish IP Ranges}
+% \subsection{Test Scan with Sample Irish IP Ranges}
 
-A test whitelist file was created with a small subset of Irish IP ranges:
+% A test whitelist file was created with a small subset of Irish IP ranges:
 
-\begin{verbatim}
-# test-ips.IE.v4
-1.178.7.0/24
-2.17.172.0/22
-2.18.236.0/22
-2.19.60.0/22
-2.19.176.0/24
-2.22.227.0/24
-2.57.24.0/22
-2.58.60.0/22
-2.58.180.0/22
-2.59.104.0/22
-3.2.34.128/26
-3.2.57.0/24
-3.2.59.0/24
-\end{verbatim}
+% \begin{verbatim}
+% # test-ips.IE.v4
+% 1.178.7.0/24
+% 2.17.172.0/22
+% 2.18.236.0/22
+% 2.19.60.0/22
+% 2.19.176.0/24
+% 2.22.227.0/24
+% 2.57.24.0/22
+% 2.58.60.0/22
+% 2.58.180.0/22
+% 2.59.104.0/22
+% 3.2.34.128/26
+% 3.2.57.0/24
+% 3.2.59.0/24
+% \end{verbatim}
 
-Total IPs in test file: approximately 8,512 IPs.
+% Total IPs in test file: approximately 8,512 IPs.
 
-\subsection{Running the Test Scan}
+% \subsection{Running the Test Scan}
 
-\begin{verbatim}
-sudo zmap -B 100K -p 25 --whitelist-file=test-ips.IE.v4 \
-    --blacklist-file=blacklist.conf -o test-zmap.ips
-\end{verbatim}
+% \begin{verbatim}
+% sudo zmap -B 100K -p 25 --whitelist-file=test-ips.IE.v4 \
+%     --blacklist-file=blacklist.conf -o test-zmap.ips
+% \end{verbatim}
 
-\subsection{Test Scan Output}
+% \subsection{Test Scan Output}
 
-\begin{verbatim}
-0:00 0%; send: 0 (0 p/s avg); recv: 0; hitrate: 0.00%
-0:10 15%; send: 1474 (147 p/s avg); recv: 0; hitrate: 0.00%
-0:20 30%; send: 2948 (147 p/s avg); recv: 0; hitrate: 0.00%
-0:30 46%; send: 4420 (147 p/s avg); recv: 0; hitrate: 0.00%
-0:40 61%; send: 5894 (147 p/s avg); recv: 0; hitrate: 0.00%
-0:50 76%; send: 7365 (147 p/s avg); recv: 0; hitrate: 0.00%
-0:58 88%; send: 8512 done (147 p/s avg); recv: 0; hitrate: 0.00%
-\end{verbatim}
+% \begin{verbatim}
+% 0:00 0%; send: 0 (0 p/s avg); recv: 0; hitrate: 0.00%
+% 0:10 15%; send: 1474 (147 p/s avg); recv: 0; hitrate: 0.00%
+% 0:20 30%; send: 2948 (147 p/s avg); recv: 0; hitrate: 0.00%
+% 0:30 46%; send: 4420 (147 p/s avg); recv: 0; hitrate: 0.00%
+% 0:40 61%; send: 5894 (147 p/s avg); recv: 0; hitrate: 0.00%
+% 0:50 76%; send: 7365 (147 p/s avg); recv: 0; hitrate: 0.00%
+% 0:58 88%; send: 8512 done (147 p/s avg); recv: 0; hitrate: 0.00%
+% \end{verbatim}
 
-\subsection{Analysis of Test Results}
+% \subsection{Analysis of Test Results}
 
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Metric} & \textbf{Value} \\
-\hline
-Total IPs scanned & 8,512 \\
-\hline
-Scan duration & ~1 minute \\
-\hline
-Average rate & 147 packets/sec \\
-\hline
-Responses received & 0 \\
-\hline
-Hitrate & 0.00\% \\
-\hline
-\end{tabular}
-\end{center}
+% \begin{center}
+% \begin{tabular}{|l|l|}
+% \hline
+% \textbf{Metric} & \textbf{Value} \\
+% \hline
+% Total IPs scanned & 8,512 \\
+% \hline
+% Scan duration & ~1 minute \\
+% \hline
+% Average rate & 147 packets/sec \\
+% \hline
+% Responses received & 0 \\
+% \hline
+% Hitrate & 0.00\% \\
+% \hline
+% \end{tabular}
+% \end{center}
 
-The 0\% hitrate is expected because the test IP ranges are primarily CDN and cloud provider ranges (Akamai, AWS, Azure) which are geolocated to Ireland but do not typically run public SMTP servers:
+% The 0\% hitrate is expected because the test IP ranges are primarily CDN and cloud provider ranges (Akamai, AWS, Azure) which are geolocated to Ireland but do not typically run public SMTP servers:
 
-\begin{itemize}
-    \item 1.x.x.x - APNIC (Asia-Pacific region)
-    \item 2.x.x.x - Akamai CDN
-    \item 3.x.x.x - AWS cloud infrastructure
-\end{itemize}
+% \begin{itemize}
+%     \item 1.x.x.x - APNIC (Asia-Pacific region)
+%     \item 2.x.x.x - Akamai CDN
+%     \item 3.x.x.x - AWS cloud infrastructure
+% \end{itemize}
 
-The test confirms that:
-\begin{enumerate}
-    \item ZMap is functioning correctly (verified with Google mail server test)
-    \item Port 25 outbound is enabled on the VPS
-    \item Rate limiting (-B 100K) is working as expected
-    \item The scanning infrastructure is ready for production use
-\end{enumerate}
+% The test confirms that:
+% \begin{enumerate}
+%     \item ZMap is functioning correctly (verified with Google mail server test)
+%     \item Port 25 outbound is enabled on the VPS
+%     \item Rate limiting (-B 100K) is working as expected
+%     \item The scanning infrastructure is ready for production use
+% \end{enumerate}
 
-For actual SMTP server discovery, the full \texttt{mm-ips.IE.v4} file should be used, which includes traditional Irish ISP ranges (77.x, 86.x, 87.x, 89.x, etc.) where mail servers are more likely to be found.
+% For actual SMTP server discovery, the full \texttt{mm-ips.IE.v4} file should be used, which includes traditional Irish ISP ranges (77.x, 86.x, 87.x, 89.x, etc.) where mail servers are more likely to be found.
 
-\bibliographystyle{plain}
-\bibliography{references}
+% \bibliographystyle{plain}
+% \bibliography{references}
