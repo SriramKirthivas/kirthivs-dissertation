@@ -4,42 +4,126 @@ This chapter includes the technical background that is necessary for understandi
 
 \section{Email Protocols and Architecture}
 
-Email functions based on several protocols that have existed for many years. The primary protocol is SMTP which stands for Simple Mail Transfer Protocol. This protocol has the job of sending mail between servers. When a person sends an email, their mail client connects with a local mail server through SMTP. After that, the local mail server forwards the email to the mail server of the recipient using SMTP again. The recipient retrieves the email using either POP3 or IMAP, depending on the email setup they have.
+Email functions based on several protocols that have existed for many years. The primary protocol is SMTP which stands for Simple Mail Transfer Protocol \cite{rfc5321}. This protocol has the job of sending mail between servers. When a person sends an email, their mail client connects with a local mail server through SMTP. After that, the local mail server forwards the email to the mail server of the recipient using SMTP again. The recipient retrieves the email using either POP3 or IMAP, depending on the email setup they have.
 
-SMTP usually uses port 25 for communication between servers. Port 587 is set aside for mail submission, which occurs when a user's mail client sends an email to their local mail server. This difference is important because port 25 is the port that can be accessed on the internet and it is the port that is being looked at in this research.
+SMTP uses port 25 for communication between servers. Port 587 is set aside for mail submission, which occurs when a user's mail client sends an email to their local mail server. This difference is important because port 25 is the port that can be accessed on the internet and it is the port that is being looked at in this research.
 
-POP3 which stands for Post Office Protocol version 3 operates on port 110 for unencrypted communication and port 995 for the TLS encrypted variant. POP3 downloads emails onto the client and usually removes them from the server. IMAP which stands for Internet Message Access Protocol operates on port 143 for unencrypted communication and port 993 for TLS. IMAP retains emails on the server and permits the client to synchronize across various devices. Most contemporary email systems utilize IMAP.
+POP3 which stands for Post Office Protocol version 3 operates on port 110 for unencrypted communication and port 995 for the TLS encrypted variant. POP3 downloads emails onto the client and removes them from the server. IMAP which stands for Internet Message Access Protocol operates on port 143 for unencrypted communication and port 993 for TLS. IMAP retains emails on the server and permits the client to synchronize across various devices.
 
-It is essential to mention that all of these protocols can be secured using TLS to safeguard the connection. When TLS is employed, the server presents a certificate that contains a public key. This public key is what we gather and examine for reuse among different servers.
+All of these protocols can be secured using TLS to safeguard the connection. When TLS is employed, the server presents a certificate that contains a public key. This public key is what we gather and examine for reuse among different servers. Figure \ref{fig:email_architecture} illustrates this end-to-end flow.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{background/mail-arch.png}
+\caption{End-to-end email delivery architecture. The sender's mail client submits the message via SMTP on port 587, the sender's server relays it to the recipient's server via SMTP on port 25, and the recipient retrieves it using POP3 or IMAP. Port 25 is the internet-facing port scanned in this research.}
+\label{fig:email_architecture}
+\end{figure}
 
 \section{TLS and Certificate Infrastructure}
-TLS is short for Transport Layer Security and it is the protocol that is utilized for encrypting connections that occur between clients and servers. It has taken the place of the older SSL protocol and it is now the standard used for securing various types of web traffic, email communications, and a range of other internet services.
+Transport Layer Security (TLS) \cite{rfc5246} encrypts connections between clients and servers, replacing the older SSL protocol as the standard for securing web traffic, email, and other internet services. When a client connects using TLS, both sides perform a handshake to establish an encrypted session. Figure \ref{fig:tls_handshake} shows this process for TLS 1.2.
 
-When a client connects to a server using TLS, the server sends a certificate to the client. This certificate contains the public key of the server and it is signed by a Certificate Authority which is often referred to as CA that the client has trust in. The client then verifies the signature on the certificate and checks to make sure that the certificate has not expired before using the public key to set up an encrypted session. This entire process is known as the TLS handshake.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{background/tls-handshake.png}
+\caption{TLS 1.2 handshake sequence between a client and a mail server. The client and server exchange supported parameters, then the server sends its certificate containing the public key (step 3, highlighted in yellow). This certificate is the cryptographic material that this dissertation collects and analyses for key reuse across Irish mail servers.}
+\label{fig:tls_handshake}
+\end{figure}
 
-Certificates have several important properties that are relevant to this dissertation. They have a validity period that includes a start date and an end date. When the end date arrives, the certificate is viewed as expired and clients are supposed to reject it. But many mail servers keep working with expired certificates because SMTP is usually more lenient compared to HTTPS in this aspect. Certificates can also be self-signed, which means that the server operator has signed it by themselves. Self-signed certificates do provide encryption but do not give authentication, which results in a situation where a client is unable to verify the authenticity of the server.
+Certificates have a validity period with a start and end date. Expired certificates should be rejected by clients, but many mail servers continue using them because SMTP does not enforce certificate validation the way HTTPS does. Certificates can also be self-signed, providing encryption without authentication.
 
-The key that is included in the certificate is the most important part for this dissertation. If two servers show certificates that have the same public key, this means that either the same operator is using one key for several servers or there has been a mistake in the key generation process. In both situations, if an attacker manages to obtain the private key, they are able to impersonate the servers or decrypt traffic for all servers that use that key.
+The public key within the certificate is the most important element for this dissertation. If two servers present certificates with the same public key, either the same operator is reusing one key across servers or key generation has failed. In both cases, compromise of the private key would allow an attacker to impersonate or decrypt traffic for all servers sharing that key.
 
 
 \subsection{Let's Encrypt and ACME}
 
-Let's Encrypt is a free Certificate Authority that started in the year 2015 and has had a large effect on the adoption of TLS. Before Let's Encrypt was available, getting a certificate meant that one had to pay a commercial Certificate Authority which caused many small server operators to opt for self-signed certificates rather than spend money on commercial certificates. 
+Let's Encrypt \cite{letsencrypt} is a free Certificate Authority that started in the year 2015 and has had a large effect on the adoption of TLS. Before Let's Encrypt was available, getting a certificate meant that one had to pay a commercial Certificate Authority which caused many small server operators to opt for self-signed certificates rather than spend money on commercial certificates. 
 
-Let's Encrypt offers certificates that remain valid for 90 days and uses the ACME protocol to make the process of issuing and renewing certificates fully automated. A server operator can install a tool such as Certbot, execute it once, and thereafter the certificates will renew automatically. The 90-day renewal cycle is significant because it ensures that Let's Encrypt servers obtain fresh certificates and keys more often compared to servers that utilize commercial Certificate Authorities that may issue certificates valid for a year or even longer.
+Let's Encrypt offers certificates that remain valid for 90 days and uses the ACME protocol to make the process of issuing and renewing certificates fully automated. A server operator can install a tool such as Certbot \cite{certbot}, execute it once, and thereafter the certificates will renew automatically. The 90-day renewal cycle is significant because it ensures that Let's Encrypt servers obtain fresh certificates and keys every 90 days, compared to commercial Certificate Authorities that issue certificates valid for one year or longer.
 
-In this research, the adoption of Let's Encrypt is significant because it has a direct impact on patterns of key reuse. When a hosting provider utilizes Let's Encrypt with automated renewal, each server receives its own distinct certificate and key, which leads to a decrease in the type of key sharing that is being investigated. The increase in the use of Let's Encrypt is likely one of the primary factors contributing to the reduction in the number of key reuse clusters when compared to previous studies.
+In this research, the adoption of Let's Encrypt is significant because it has a direct impact on patterns of key reuse. When a hosting provider utilizes Let's Encrypt with automated renewal, each server receives its own distinct certificate and key, which leads to a decrease in the type of key sharing that is being investigated. The increase in the use of Let's Encrypt is one of the factors contributing to the reduction in the number of key reuse clusters when compared to previous studies. Figure \ref{fig:letsencrypt_acme} shows the automated renewal flow.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{background/letsencrypt-acme.png}
+\caption{Automated certificate renewal using Let's Encrypt and the ACME protocol. Certbot on the mail server requests a new certificate from Let's Encrypt every 90 days, receiving a fresh certificate and private key each time. This automated cycle reduces key reuse because each renewal generates a unique key pair.}
+\label{fig:letsencrypt_acme}
+\end{figure}
 
 \subsection{Cipher Suites}
 
 During the TLS handshake, a procedure occurs where the client and server negotiate a cipher suite, which consists of various algorithms that are utilized for key exchange, encryption, and message authentication. The cipher suite plays a role in determining the strength of the encryption being utilized.
 
-It is seen as a modern best practice to implement ECDHE for key exchange since this method offers forward secrecy, meaning that if the server's private key were to be compromised, it would not permit the decryption of previous sessions. AES-GCM is the preferred encryption algorithm, and SHA-256 is employed for message authentication.
+Modern best practice is to implement ECDHE for key exchange since this method offers forward secrecy, meaning that if the server's private key were to be compromised, it would not permit the decryption of previous sessions. AES-GCM is the preferred encryption algorithm, and SHA-256 is employed for message authentication.
 
-Nonetheless, there exist older and weaker cipher suites that continue to be in use. RC4 is a stream cipher that was deprecated by RFC 7465 in the year 2015 following the demonstration by researchers that practical attacks against it were possible. Despite this, our scanning revealed that there are servers in Ireland that are still using RC4 connections as late as 2026. CBC mode ciphers are also viewed as weak due to vulnerabilities such as BEAST and Lucky13. The use of static RSA key exchange, which means using the server's RSA key directly for the key exchange process, does not offer forward secrecy and is not recommended anymore.
+Older and weaker cipher suites continue to be in use. RC4 is a stream cipher that was deprecated by RFC 7465 \cite{rfc7465} in the year 2015 following the demonstration by researchers that practical attacks against it were possible. Despite this, our scanning revealed that there are servers in Ireland that are still using RC4 connections as late as 2026. CBC mode ciphers are weak due to vulnerabilities such as BEAST \cite{duong2011beast} and Lucky13 \cite{al2013lucky}. The use of static RSA key exchange, which means using the server's RSA key directly for the key exchange process, does not offer forward secrecy and is deprecated.
 
 \section{SSH and Host Keys}
 
-SSH is the Secure Shell protocol that is utilized for remote authentication of servers and it operates on port 22 while using host keys for server identification. When a client makes a connection to an SSH server for the first time, it is given the server's host key and this key is stored by the client. For any future connections, the client will verify that the key has not changed and if there is a change in the key, the client will provide a warning to the user indicating that there may be an issue. 
+SSH is the Secure Shell protocol \cite{rfc4253} that is utilized for remote authentication of servers and it operates on port 22 while using host keys for server identification. When a client makes a connection to an SSH server for the first time, it is given the server's host key and this key is stored by the client. For any future connections, the client will verify that the key has not changed and if there is a change in the key, the client will provide a warning to the user indicating that the server identity has changed. 
 
-SSH host keys perform a function that is comparable to TLS certificates since they identify a server through a public key. In situations where two servers have the same SSH host key, if an attacker is able to compromise one of the servers, that attacker can then impersonate the other server. The reuse of SSH host keys can occur when servers are duplicated from a template image without creating new keys or when a hosting provider utilizes the same base image across all of their customers.
+SSH host keys serve the same function as TLS certificates since they identify a server through a public key. In situations where two servers have the same SSH host key, if an attacker is able to compromise one of the servers, that attacker can then impersonate the other server. The reuse of SSH host keys can occur when servers are duplicated from a template image without creating new keys or when a hosting provider utilizes the same base image across all of their customers. Figure \ref{fig:ssh_key_reuse} illustrates this risk.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{background/SSH.png}
+\caption{SSH host key reuse across two servers. When Server A and Server B present the same host key, compromising the private key of one server allows an attacker to impersonate the other. This commonly occurs when servers are cloned from a shared template image without regenerating keys.}
+\label{fig:ssh_key_reuse}
+\end{figure}
+
+\section{STARTTLS vs Implicit TLS}
+
+There are two ways TLS is used with mail protocols. STARTTLS is a protocol extension where the client connects on the plaintext port (25, 110, 143) and then upgrades the connection to TLS by issuing a STARTTLS command. The connection starts unencrypted and switches to encrypted mid-session. Implicit TLS uses a separate port (465, 993, 995) where the connection is encrypted from the first byte. No plaintext phase exists.
+
+In this research, ZGrab attempts STARTTLS on ports 25, 110, 143, and 587, and connects with implicit TLS on port 993. Both methods result in a TLS handshake where the server presents its certificate, which is what we collect. Figure \ref{fig:starttls_vs_implicit} compares the two approaches.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{background/Starttleimplicit.png}
+\caption{Comparison of STARTTLS and Implicit TLS connection methods. STARTTLS begins with a plaintext connection on standard ports before upgrading to encryption mid-session, while Implicit TLS uses dedicated ports where encryption starts immediately with no plaintext phase. Both methods ultimately result in a TLS handshake that presents the server's certificate.}
+\label{fig:starttls_vs_implicit}
+\end{figure}
+
+\section{Key Algorithms}
+
+TLS certificates contain a public key that uses one of several cryptographic algorithms. RSA is the most common, and keys are identified by their bit length. RSA-2048 is the current minimum recommended key size. RSA keys below 2048 bits (such as RSA-1024) are considered weak because they can be factored with sufficient computational resources. RSA-4096 provides a larger security margin.
+
+ECDSA (Elliptic Curve Digital Signature Algorithm) is an alternative to RSA that provides equivalent security with shorter key lengths. A 256-bit ECDSA key provides comparable security to a 3072-bit RSA key. ECDSA adoption is growing, particularly through managed services like Amazon SES.
+
+\section{Internet-Wide Scanning}
+
+Scanning the entire internet, or a subset of it like all Irish IP addresses, is a technique that has become practical in the last decade thanks to tools designed for it. Figure \ref{fig:scanning_pipeline} shows the complete scanning pipeline used in this dissertation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{background/scan-pipeline.png}
+\caption{The scanning pipeline used in this dissertation. Irish IPv4 addresses are identified using the MaxMind GeoLite2 database, ZMap performs a SYN scan on port 25 to find open hosts, FreshGrab connects to those hosts to collect TLS certificates and SSH keys across multiple ports, and SameKeys groups hosts that share at least one cryptographic key into reuse clusters.}
+\label{fig:scanning_pipeline}
+\end{figure}
+
+\subsection{ZMap}
+
+ZMap \cite{zmap2013} is a stateless network scanner developed by Durumeric et al. at the University of Michigan. It can scan the entire IPv4 address space on a single port in under an hour. ZMap works by sending one SYN packet to each target IP and recording which ones respond with a SYN-ACK, indicating that the port is open.
+
+The key design decision in ZMap is that it is stateless. Traditional scanners like Nmap maintain a table of connections and wait for responses, which limits how fast they can go. ZMap does not keep track of outstanding probes. It encodes the target information into the packet itself and uses a technique based on cyclic multiplicative groups to visit IP addresses in a random order without repeating any.
+
+For this research, ZMap was used to scan all Irish IPv4 addresses on port 25 to find mail servers. The Irish address space was determined using the MaxMind GeoLite2 database \cite{maxmind}, which maps IP prefixes to countries.
+
+\subsection{ZGrab and FreshGrab}
+
+Once ZMap identifies which hosts have a port open, the next step is to connect to those hosts and collect information. ZGrab performs application-layer handshakes, such as TLS handshakes on mail ports or SSH key exchanges on port 22, and records the responses.
+
+FreshGrab is a wrapper around ZGrab that was developed as part of the surveys project this dissertation builds on. It takes the list of IPs found by ZMap and connects to each one across multiple ports, collecting TLS certificates and SSH host keys from ports 22, 25, 110, 143, 443, 587, and 993. The output is a JSON file with one line per IP containing all the cryptographic material collected.
+
+\subsection{SameKeys}
+
+SameKeys is a Python script from the surveys project that takes the output of FreshGrab and looks for cryptographic key reuse. It compares the public key fingerprints across all hosts and groups them into clusters where two or more hosts share at least one key.
+
+The output is a JSON file listing all the clusters with their member IPs, the ports on which the shared keys were found, and the key types involved. In the 2018 study \cite{cryptoeprint:2018/299}, SameKeys found 1,437 clusters across Irish mail servers. This dissertation reruns the same tool on 2026 data and compares the results.
+
+\section{Previous Work}
+
+The most directly relevant previous work is the 2018 study by Farrell \cite{cryptoeprint:2018/299}, which performed the same kind of scanning on Irish mail servers and found significant key reuse. That study used ZMap to find hosts, ZGrab to collect keys, and SameKeys to identify clusters. It found 1,437 clusters of hosts sharing cryptographic keys, with 53\% of all scanned hosts belonging to at least one cluster.
+
+Durumeric et al. \cite{durumeric2013analysis} conducted a large scale analysis of the HTTPS certificate ecosystem in 2013, which demonstrated that internet-wide scanning could reveal widespread problems in how certificates are managed. Their work showed that many certificates were shared across multiple hosts, because of hosting providers deploying the same certificate to all their customers.
+
+Heninger et al. \cite{heninger2012mining} in 2012 showed that a significant number of TLS and SSH keys on the internet shared common factors, meaning their random number generation was flawed. This was a different kind of key reuse where the keys were not identical but were mathematically related in a way that allowed the private key to be recovered.
